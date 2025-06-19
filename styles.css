@@ -1,0 +1,1092 @@
+/* Charity: water Brand Colors
+
+Primary Colors:
+- Yellow:     #FFC907
+- Blue:       #2E9DF7
+
+Secondary Colors:
+- Light Blue: #8BD1CB
+- Green:      #4FCB53
+- Orange:     #FF902A
+- Red:        #F5402C
+- Dark Green: #159A48
+- Pink:       #F16061
+
+*/
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #e3f6fd;
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  min-height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+}
+
+.hidden {
+  display: none;
+}
+
+.background-animated {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0;
+  background: linear-gradient(to bottom, #b3e0fc 0%, #e3f6fd 100%);
+  /* Placeholder for animated background */
+  animation: bgMove 10s linear infinite alternate;
+}
+
+.starter-screen .background-animated {
+  background: linear-gradient(to bottom, #b3e0fc 0%, #e3f6fd 100%);
+}
+
+@keyframes bgMove {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 100px; }
+}
+
+header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+  margin-top: 30px;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin: 0 0 10px 0;
+  letter-spacing: 2px;
+  z-index: 1;
+}
+
+/* Level Selector button */
+#level-selector-btn {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  z-index: 2;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #222;
+  cursor: pointer;
+}
+
+/* Sign with game title */
+.sign {
+  position: relative;
+  margin: 90px auto 0 auto;
+  width: 440px;
+  height: 120px;
+  background: #ffe066;
+  border: 6px solid #bfa14a;
+  border-radius: 22px;
+  box-shadow: 0 8px 24px #0002, 0 2px 0 #bfa14a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  /* Hanging sign effect */
+}
+.sign span {
+  font-size: 3.2rem;
+  font-weight: 900;
+  color: #222;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 8px #fff8;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  text-align: center;
+  line-height: 1.05;
+  word-break: break-word;
+  display: block;
+}
+
+/* Hanging ropes */
+.sign::before,
+.sign::after {
+  content: '';
+  position: absolute;
+  top: -60px;
+  width: 4px;
+  height: 60px;
+  background: #bfa14a;
+  border-radius: 2px;
+  z-index: 1;
+}
+.sign::before {
+  left: 80px;
+}
+.sign::after {
+  right: 80px;
+}
+
+/* Top anchor points */
+.sign-anchor {
+  position: absolute;
+  top: 32px;
+  left: calc(50% - 160px);
+  width: 320px;
+  height: 0;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 3;
+}
+.sign-anchor-dot {
+  width: 16px;
+  height: 16px;
+  background: #bfa14a;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px #0002;
+}
+
+.starter-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* Center content vertically */
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+  z-index: 1;
+}
+
+.starter-content .charity-logo {
+  margin-bottom: 40px;
+  font-size: 1.3rem;
+  color: #ffd700;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.starter-content h1 {
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: #222;
+  margin-bottom: 48px;
+  letter-spacing: 2px;
+  text-align: center;
+  text-shadow: 0 2px 8px #fff8;
+}
+
+/* Start button */
+#start-btn {
+  display: block;
+  font-size: 2rem;
+  padding: 18px 80px;
+  border-radius: 40px;
+  border: none;
+  background: #ffd700;
+  color: #222;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 126px auto 0 auto;
+  box-shadow: 0 4px 16px #0002;
+  transition: background 0.2s;
+  z-index: 2;
+  align-self: center; /* Center horizontally in flex column */
+}
+#start-btn:hover {
+  background: #ffe066;
+}
+
+/* Buckets row */
+.buckets-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  position: absolute;
+  left: 5vw;   /* Less margin for better fit on laptops */
+  right: 5vw;
+  bottom: 104px;
+  margin: 0 auto;
+  z-index: 3;
+  width: 90vw; /* Use more of the screen width */
+  gap: 0;
+}
+
+/* Move clean and unknown buckets for better spacing */
+.buckets-row .bucket-clean {
+  margin-left: 4vw;
+}
+.buckets-row .bucket-unknown {
+  margin-right: 4vw;
+}
+
+/* Realistic buckets */
+.bucket {
+  width: 170px;    /* Bigger and wider */
+  height: 140px;   /* Not too tall */
+  background: #e0e0e0;
+  border: 4px solid #b3b3b3;
+  border-bottom: 10px solid #b3b3b3;
+  border-radius: 0 0 18px 18px / 0 0 28px 28px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px #0001;
+  overflow: visible;
+}
+.bucket::before {
+  content: '';
+  position: absolute;
+  top: -18px; left: 50%;
+  transform: translateX(-50%);
+  width: 120px; height: 22px;
+  border: 4px solid #b3b3b3;
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  background: transparent;
+  z-index: 2;
+}
+.bucket-label {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  font-weight: bold;
+  color: #222;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  /* Remove background and border radius */
+  background: none;
+  border-radius: 0;
+  padding: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Bucket color accents */
+.bucket-clean {
+  background: #e0f7fa;
+  border-color: #4fc3f7;
+  border-bottom: 10px solid #4fc3f7;
+}
+.bucket-dirty {
+  background: #fbe9e7;
+  border-color: #ff7043;
+  border-bottom: 10px solid #ff7043;
+}
+.bucket-unknown {
+  background: #ede7f6;
+  border-color: #9575cd;
+  border-bottom: 10px solid #9575cd;
+}
+
+/* Ground/grass/dirt section */
+.ground {
+  width: 100vw;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* More realistic grass */
+.grass {
+  width: 100vw;
+  height: 56px;
+  background: linear-gradient(to top, #6fbf3c 70%, #b6e388 100%);
+  border-top-left-radius: 60px 24px;
+  border-top-right-radius: 60px 24px;
+  box-shadow: 0 -4px 16px #0003;
+  position: relative;
+  z-index: 2;
+  overflow: visible;
+}
+.grass::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(ellipse at 20% 80%, #b6e38899 10%, transparent 60%),
+    radial-gradient(ellipse at 80% 60%, #7ec85077 10%, transparent 60%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.grass::after {
+  content: '';
+  position: absolute;
+  left: 8%; top: 10px;
+  width: 84%;
+  height: 22px;
+  background: repeating-linear-gradient(
+    90deg,
+    #8fd35f 0 5px,
+    transparent 5px 16px
+  );
+  opacity: 0.22;
+  pointer-events: none;
+}
+/* Add simple grass blades */
+.grass-blade {
+  position: absolute;
+  bottom: 8px;
+  width: 3px;
+  height: 18px;
+  background: linear-gradient(to top, #5fa82d 60%, #b6e388 100%);
+  border-radius: 50px 50px 0 0;
+  z-index: 3;
+  opacity: 0.7;
+}
+.grass-blade.blade1 { left: 12%; height: 16px; }
+.grass-blade.blade2 { left: 18%; height: 20px; }
+.grass-blade.blade3 { left: 25%; height: 14px; }
+.grass-blade.blade4 { left: 40%; height: 22px; }
+.grass-blade.blade5 { left: 55%; height: 18px; }
+.grass-blade.blade6 { left: 67%; height: 15px; }
+.grass-blade.blade7 { left: 78%; height: 19px; }
+.grass-blade.blade8 { left: 85%; height: 13px; }
+
+/* More realistic dirt */
+.dirt {
+  width: 100vw;
+  height: 70px;
+  background: linear-gradient(to bottom, #a97c50 60%, #7c5a36 100%);
+  border-bottom-left-radius: 36px 18px;
+  border-bottom-right-radius: 36px 18px;
+  box-shadow: 0 -4px 16px #0003;
+  position: relative;
+  overflow: visible;
+}
+.dirt::after {
+  content: '';
+  position: absolute;
+  left: 10%; top: 28px;
+  width: 80%;
+  height: 22px;
+  background:
+    radial-gradient(circle at 10% 60%, #7c5a36 2.5px, transparent 5px),
+    radial-gradient(circle at 30% 80%, #8d6e4a 3px, transparent 6px),
+    radial-gradient(circle at 60% 50%, #bfa97a 2px, transparent 5px),
+    radial-gradient(circle at 80% 70%, #7c5a36 2.5px, transparent 5px),
+    radial-gradient(circle at 50% 90%, #8d6e4a 2.5px, transparent 5px);
+  opacity: 0.22;
+  pointer-events: none;
+}
+/* Add simple rocks */
+.dirt-rock {
+  position: absolute;
+  bottom: 10px;
+  background: #bfa97a;
+  border-radius: 50%;
+  opacity: 0.35;
+}
+.dirt-rock.rock1 { left: 18%; width: 12px; height: 8px; }
+.dirt-rock.rock2 { left: 37%; width: 8px; height: 8px; }
+.dirt-rock.rock3 { left: 52%; width: 14px; height: 10px; }
+.dirt-rock.rock4 { left: 68%; width: 10px; height: 7px; }
+.dirt-rock.rock5 { left: 81%; width: 9px; height: 9px; }
+
+/* Charity: water logo/learning section */
+.charity-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s;
+  padding: 0 12px;
+  min-height: 32px;
+}
+.cw-logo-img {
+  height: 56px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+/* Animated sky background */
+.sky-background {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  /* Make the sky a bit taller so clouds don't get cut off */
+  height: 70vh;
+  background: linear-gradient(to bottom, #b3e0fc 0%, #e3f6fd 100%);
+  overflow: visible; /* Allow clouds to overflow the sky area */
+  z-index: 0;
+}
+
+/* Realistic, simple, moving clouds of various sizes for starter screen */
+.cloud {
+  position: absolute;
+  opacity: 0.92;
+  pointer-events: none;
+}
+
+.cloud-part, .cloud-shape {
+  position: absolute;
+  background: #fff;
+  border-radius: 50%;
+  filter: blur(2px) drop-shadow(0 8px 18px #b3e0fc66);
+  opacity: 0.92;
+}
+
+/* Cloud 1: Large, fluffy */
+.cloud1 .cloud-part1 { width: 180px; height: 90px; left: 0; top: 30px; }
+.cloud1 .cloud-part2 { width: 120px; height: 60px; left: 100px; top: 0; }
+.cloud1 .cloud-part3 { width: 80px; height: 40px; left: 60px; top: 60px; }
+
+/* Cloud 2: Medium, layered */
+.cloud2 .cloud-part1 { width: 120px; height: 60px; left: 0; top: 20px; }
+.cloud2 .cloud-part2 { width: 80px; height: 40px; left: 70px; top: 0; }
+.cloud2 .cloud-part3 { width: 60px; height: 30px; left: 110px; top: 30px; }
+
+/* Cloud 3: Small, puffy */
+.cloud3 .cloud-part1 { width: 70px; height: 35px; left: 0; top: 10px; }
+.cloud3 .cloud-part2 { width: 40px; height: 20px; left: 30px; top: 0; }
+.cloud3 .cloud-part3 { width: 30px; height: 15px; left: 50px; top: 18px; }
+
+/* Cloud 4: Large, flat */
+.cloud4 .cloud-part1 { width: 160px; height: 60px; left: 0; top: 20px; }
+.cloud4 .cloud-part2 { width: 100px; height: 40px; left: 90px; top: 0; }
+.cloud4 .cloud-part3 { width: 80px; height: 30px; left: 140px; top: 25px; }
+
+/* Cloud 5: Tall, layered */
+.cloud5 .cloud-part1 { width: 100px; height: 60px; left: 0; top: 30px; }
+.cloud5 .cloud-part2 { width: 60px; height: 80px; left: 60px; top: 0; }
+.cloud5 .cloud-part3 { width: 50px; height: 40px; left: 90px; top: 40px; }
+
+/* Cloud 6: Medium, simple */
+.cloud6 .cloud-part1 { width: 90px; height: 40px; left: 0; top: 10px; }
+.cloud6 .cloud-part2 { width: 60px; height: 30px; left: 40px; top: 0; }
+
+/* Cloud 7: Small, simple */
+.cloud7 .cloud-part1 { width: 50px; height: 20px; left: 0; top: 8px; }
+.cloud7 .cloud-part2 { width: 30px; height: 12px; left: 20px; top: 0; }
+
+/* Cloud 8: Large, fluffy */
+.cloud8 .cloud-part1 { width: 140px; height: 70px; left: 0; top: 20px; }
+.cloud8 .cloud-part2 { width: 90px; height: 40px; left: 60px; top: 0; }
+.cloud8 .cloud-part3 { width: 60px; height: 30px; left: 100px; top: 35px; }
+
+/* Cloud 9: Medium, puffy */
+.cloud9 .cloud-part1 { width: 100px; height: 40px; left: 0; top: 10px; }
+.cloud9 .cloud-part2 { width: 60px; height: 20px; left: 40px; top: 0; }
+
+/* Cloud 10: Small, simple */
+.cloud10 .cloud-part1 { width: 60px; height: 20px; left: 0; top: 6px; }
+.cloud10 .cloud-part2 { width: 30px; height: 10px; left: 20px; top: 0; }
+
+/* Combine cloud position, duration, and animation into one rule */
+.cloud1 { top: 24px; left: -300px; --cloud-dur: 20s; }
+.cloud2 { top: 60px; left: -220px; --cloud-dur: 26s; }
+.cloud3 { top: 180px; left: -120px; --cloud-dur: 16s; }
+.cloud4 { top: 260px; left: -350px; --cloud-dur: 22s; }
+.cloud5 { top: 320px; left: -200px; --cloud-dur: 18s; }
+.cloud6 { top: 100px; left: -90px; --cloud-dur: 14s; }
+.cloud7 { top: 380px; left: -60px; --cloud-dur: 12s; }
+.cloud8 { top: 80px; left: -180px; --cloud-dur: 24s; }
+.cloud9 { top: 420px; left: -100px; --cloud-dur: 15s; }
+.cloud10 { top: 480px; left: -70px; --cloud-dur: 18s; }
+
+.cloud {
+  position: absolute;
+  opacity: 0.92;
+  pointer-events: none;
+  animation: cloud-move-x var(--cloud-dur, 20s) linear infinite;
+}
+
+/* Use a single keyframe for all clouds */
+@keyframes cloud-move-x {
+  0% { left: inherit; }
+  100% { left: 110vw; }
+}
+
+/* Game screen: animated sky background and clouds, same as starter screen */
+.game-screen .sky-background {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 70vh; /* Match starter screen sky height */
+  background: linear-gradient(to bottom, #b3e0fc 0%, #e3f6fd 100%);
+  overflow: visible; /* Allow clouds to overflow the sky area */
+  z-index: 0;
+}
+
+/* Game screen clouds: same as starter screen */
+.game-screen .cloud { 
+  position: absolute;
+  opacity: 0.92;
+  pointer-events: none;
+}
+.game-screen .cloud-part {
+  position: absolute;
+  background: #fff;
+  border-radius: 50%;
+  filter: blur(2px) drop-shadow(0 8px 18px #b3e0fc66);
+  opacity: 0.92;
+}
+
+/* Position and animate each cloud on the game screen */
+.game-screen .cloud1 { top: 24px; left: -300px; animation: cloud-move1 20s linear infinite; }
+.game-screen .cloud2 { top: 60px; left: -220px; animation: cloud-move2 26s linear infinite; }
+.game-screen .cloud3 { top: 180px; left: -120px; animation: cloud-move3 16s linear infinite; }
+.game-screen .cloud4 { top: 260px; left: -350px; animation: cloud-move4 22s linear infinite; }
+.game-screen .cloud5 { top: 320px; left: -200px; animation: cloud-move5 18s linear infinite; }
+.game-screen .cloud6 { top: 100px; left: -90px; animation: cloud-move6 14s linear infinite; }
+.game-screen .cloud7 { top: 380px; left: -60px; animation: cloud-move7 12s linear infinite; }
+.game-screen .cloud8 { top: 80px; left: -180px; animation: cloud-move8 24s linear infinite; }
+.game-screen .cloud9 { top: 420px; left: -100px; animation: cloud-move9 15s linear infinite; }
+.game-screen .cloud10 { top: 480px; left: -70px; animation: cloud-move10 18s linear infinite; }
+
+/* Keyframes for individual cloud animations on game screen */
+@keyframes cloud-move1 {
+  0% { left: -300px; }
+  100% { left: 100vw; }
+}
+@keyframes cloud-move2 {
+  0% { left: -220px; }
+  100% { left: 100vw; }
+}
+@keyframes cloud-move3 {
+  0% { left: -120px; }
+  100% { left: 100vw; }
+}
+@keyframes cloud-move4 {
+  0% { left: -350px; }
+  100% { left: 100vw; }
+}
+@keyframes cloud-move5 {
+  0% { left: -200px; }
+  100% { left: 100vw; }
+}
+@keyframes cloud-move6 {
+  0% { left: -90px; }
+  100% { left: 100vw; }
+}
+@keyframes cloud-move7 {
+  0% { left: -60px; }
+  100% { left: 100vw; }
+}
+@keyframes cloud-move8 {
+  0% { left: -180px; }
+  100% { left: 100vw; }
+}
+@keyframes cloud-move9 {
+  0% { left: -100px; }
+  100% { left: 100vw; }
+}
+@keyframes cloud-move10 {
+  0% { left: -70px; }
+  100% { left: 100vw; }
+}
+
+/* Buckets row: same as starter, on the grass */
+.game-screen .buckets-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100px; /* Match the grass top on starter screen */
+  margin: 0 auto;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  gap: 340px; /* Even more space between buckets for easier dragging */
+}
+.game-screen .bucket,
+.game-screen .bucket-clean,
+.game-screen .bucket-dirty,
+.game-screen .bucket-unknown {
+  width: 170px;
+  height: 140px;
+  background: linear-gradient(120deg, #e0e0e0 70%, #f5f5f5 100%);
+  border: 3px solid #b3b3b3;
+  border-bottom: 10px solid #b3b3b3;
+  border-radius: 0 0 14px 14px / 0 0 22px 22px;
+  position: relative;
+  box-shadow: 0 8px 18px #0002, 0 2px 0 #b3b3b3;
+  overflow: visible;
+}
+.game-screen .bucket::before {
+  width: 120px; height: 22px;
+}
+.game-screen .bucket-label {
+  font-size: 2rem;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: bold;
+  color: #222;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: none;
+  border-radius: 0;
+  padding: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Ground, grass, dirt: same as starter */
+.game-screen .ground {
+  width: 100vw;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.game-screen .grass {
+  width: 100vw;
+  height: 56px;
+  background: linear-gradient(to top, #6fbf3c 70%, #b6e388 100%);
+  border-top-left-radius: 60px 24px;
+  border-top-right-radius: 60px 24px;
+  box-shadow: 0 -4px 16px #0003;
+  position: relative;
+  z-index: 2;
+  overflow: visible;
+}
+.game-screen .grass::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(ellipse at 20% 80%, #b6e38899 10%, transparent 60%),
+    radial-gradient(ellipse at 80% 60%, #7ec85077 10%, transparent 60%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.game-screen .grass::after {
+  content: '';
+  position: absolute;
+  left: 8%; top: 10px;
+  width: 84%;
+  height: 22px;
+  background: repeating-linear-gradient(
+    90deg,
+    #8fd35f 0 5px,
+    transparent 5px 16px
+  );
+  opacity: 0.22;
+  pointer-events: none;
+}
+.game-screen .grass-blade {
+  position: absolute;
+  bottom: 8px;
+  width: 3px;
+  height: 18px;
+  background: linear-gradient(to top, #5fa82d 60%, #b6e388 100%);
+  border-radius: 50px 50px 0 0;
+  z-index: 3;
+  opacity: 0.7;
+}
+.game-screen .grass-blade.blade1 { left: 12%; height: 16px; }
+.game-screen .grass-blade.blade2 { left: 18%; height: 20px; }
+.game-screen .grass-blade.blade3 { left: 25%; height: 14px; }
+.game-screen .grass-blade.blade4 { left: 40%; height: 22px; }
+.game-screen .grass-blade.blade5 { left: 55%; height: 18px; }
+.game-screen .grass-blade.blade6 { left: 67%; height: 15px; }
+.game-screen .grass-blade.blade7 { left: 78%; height: 19px; }
+.game-screen .grass-blade.blade8 { left: 85%; height: 13px; }
+.game-screen .dirt {
+  width: 100vw;
+  height: 70px;
+  background: linear-gradient(to bottom, #a97c50 60%, #7c5a36 100%);
+  border-bottom-left-radius: 36px 18px;
+  border-bottom-right-radius: 36px 18px;
+  box-shadow: 0 -4px 16px #0003;
+  position: relative;
+  overflow: visible;
+}
+.game-screen .dirt::after {
+  content: '';
+  position: absolute;
+  left: 10%; top: 28px;
+  width: 80%;
+  height: 22px;
+  background:
+    radial-gradient(circle at 10% 60%, #7c5a36 2.5px, transparent 5px),
+    radial-gradient(circle at 30% 80%, #8d6e4a 3px, transparent 6px),
+    radial-gradient(circle at 60% 50%, #bfa97a 2px, transparent 5px),
+    radial-gradient(circle at 80% 70%, #7c5a36 2.5px, transparent 5px),
+    radial-gradient(circle at 50% 90%, #8d6e4a 2.5px, transparent 5px);
+  opacity: 0.22;
+  pointer-events: none;
+}
+.game-screen .dirt-rock {
+  position: absolute;
+  bottom: 10px;
+  background: #bfa97a;
+  border-radius: 50%;
+  opacity: 0.35;
+}
+.game-screen .dirt-rock.rock1 { left: 18%; width: 12px; height: 8px; }
+.game-screen .dirt-rock.rock2 { left: 37%; width: 8px; height: 8px; }
+.game-screen .dirt-rock.rock3 { left: 52%; width: 14px; height: 10px; }
+.game-screen .dirt-rock.rock4 { left: 68%; width: 10px; height: 7px; }
+.game-screen .dirt-rock.rock5 { left: 81%; width: 9px; height: 9px; }
+
+/* Charity logo: same as starter */
+.game-screen .charity-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s;
+  padding: 0 12px;
+  min-height: 32px;
+}
+.game-screen .cw-logo-img {
+  height: 56px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+/* Score tracker at top left */
+.game-screen .score-tracker {
+  position: absolute;
+  top: 32px;
+  left: 32px;
+  z-index: 10;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  background: rgba(255,255,255,0.7);
+  border-radius: 12px;
+  padding: 8px 22px;
+  box-shadow: 0 2px 8px #0002;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* Timer display */
+#game-timer {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  z-index: 10;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  background: rgba(255,255,255,0.7);
+  border-radius: 12px;
+  padding: 8px 22px;
+  box-shadow: 0 2px 8px #0002;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* Circular glow for rain drops */
+.rain-glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+  /* The rest is set inline for color and size */
+}
+
+/* Overlay styles for win/lose/message overlays */
+.overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(179,224,252,0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+.overlay.hidden {
+  display: none !important;
+}
+.overlay-content {
+  background: #fffbe9;
+  border-radius: 22px;
+  max-width: 500px;
+  min-width: 320px;
+  min-height: 440px;
+  padding: 38px 32px;
+  box-shadow: 0 8px 32px #0003;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid #4fc3f7;
+}
+.overlay-title.win {
+  color: #159A48;
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  margin-top: 0;
+  letter-spacing: 1px;
+  text-align: center;
+}
+.overlay-title.lose {
+  color: #F5402C;
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  margin-top: 0;
+  letter-spacing: 1px;
+  text-align: center;
+}
+.overlay-subtitle.win {
+  font-size: 1.45rem;
+  color: #2E9DF7;
+  font-weight: bold;
+  margin-bottom: 28px;
+  margin-top: 0;
+  text-align: center;
+}
+.overlay-logo {
+  height: 54px;
+  margin-bottom: 28px;
+  margin-top: 0;
+  background: #222;
+  border-radius: 8px;
+}
+.overlay-message {
+  font-size: 1.13rem;
+  color: #159A48;
+  margin-bottom: 36px;
+  margin-top: 0;
+  line-height: 1.5;
+}
+.overlay-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 32px;
+  margin-top: 10px;
+}
+.overlay-btn {
+  font-size: 1.2rem;
+  padding: 12px 36px;
+  border-radius: 22px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #2E9DF766;
+}
+.overlay-btn.win {
+  background: #2E9DF7;
+  color: #fff;
+}
+.overlay-btn.quit {
+  background: #F5402C;
+  color: #fff;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px #F5402C66;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .buckets-row,
+  .starter-screen .buckets-row,
+  .game-screen .buckets-row {
+    left: 2vw;
+    right: 2vw;
+    width: 96vw;
+  }
+  .buckets-row .bucket-clean,
+  .game-screen .bucket-clean,
+  .starter-screen .bucket-clean {
+    margin-left: 2vw;
+  }
+  .buckets-row .bucket-unknown,
+  .game-screen .bucket-unknown,
+  .starter-screen .bucket-unknown {
+    margin-right: 2vw;
+  }
+}
+
+@media (max-width: 700px) {
+  .buckets-row,
+  .starter-screen .buckets-row,
+  .game-screen .buckets-row {
+    left: 0;
+    right: 0;
+    width: 100vw;
+    gap: 0;
+  }
+  .buckets-row .bucket-clean,
+  .game-screen .bucket-clean,
+  .starter-screen .bucket-clean {
+    margin-left: 0.5vw;
+  }
+  .buckets-row .bucket-unknown,
+  .game-screen .bucket-unknown,
+  .starter-screen .bucket-unknown {
+    margin-right: 0.5vw;
+  }
+  .bucket,
+  .starter-screen .bucket,
+  .starter-screen .bucket-clean,
+  .starter-screen .bucket-dirty,
+  .starter-screen .bucket-unknown,
+  .game-screen .bucket,
+  .game-screen .bucket-clean,
+  .game-screen .bucket-dirty,
+  .game-screen .bucket-unknown {
+    width: 90px;
+    height: 70px;
+  }
+  .bucket-label,
+  .starter-screen .bucket-label,
+  .game-screen .bucket-label {
+    font-size: 1.1rem;
+    padding: 2px 6px;
+  }
+}
+
+/* Add a metallic rim */
+.starter-screen .bucket::before {
+  content: '';
+  position: absolute;
+  top: -8px; left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 8px;
+  background: #f5f5f5;
+  border: 2px solid #b3b3b3;
+  border-radius: 40% 40% 20% 20% / 60% 60% 40% 40%;
+  z-index: 2;
+}
+
+/* Add a simple handle */
+.starter-screen .bucket::after {
+  content: '';
+  position: absolute;
+  top: -22px; left: 50%;
+  transform: translateX(-50%);
+  width: 54%;
+  height: 16px;
+  border: 2px solid #b3b3b3;
+  border-bottom: none;
+  border-radius: 0 0 18px 18px / 0 0 32px 32px;
+  z-index: 1;
+  background: transparent;
+}
+
+/* Add subtle vertical lines for a metallic look */
+.starter-screen .bucket {
+  background: linear-gradient(120deg, #e0e0e0 70%, #f5f5f5 100%);
+}
+.starter-screen .bucket-clean,
+.starter-screen .bucket-dirty,
+.starter-screen .bucket-unknown {
+  background: linear-gradient(120deg, #e0e0e0 70%, #f5f5f5 100%);
+}
+
+/* Add a shadow at the base for realism */
+.starter-screen .bucket-shadow {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 12px;
+  background: radial-gradient(ellipse at center, #8884 60%, transparent 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Remove water flow animation from game background */
+.sky-background,
+.game-screen .sky-background {
+  background: linear-gradient(to bottom, #b3e0fc 0%, #e3f6fd 100%);
+  /* Remove animation and background-size */
+  /* animation: bgMove 20s linear infinite alternate; */
+  /* background-size: 100% 200%; */
+}
+
+.starter-screen .buckets-row,
+.game-screen .buckets-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  position: absolute;
+  left: 5vw;
+  right: 5vw;
+  bottom: 104px;
+  margin: 0 auto;
+  z-index: 3;
+  width: 90vw;
+  gap: 0;
+}
+.game-screen .bucket-clean,
+.starter-screen .bucket-clean {
+  margin-left: 4vw;
+}
+.game-screen .bucket-unknown,
+.starter-screen .bucket-unknown {
+  margin-right: 4vw;
+}
+
+/* Remove color outline for starter screen buckets (no blue, red, or purple bottom border) */
+.starter-screen .bucket-clean,
+.starter-screen .bucket-dirty,
+.starter-screen .bucket-unknown {
+  background: linear-gradient(120deg, #e0e0e0 70%, #f5f5f5 100%);
+  border-color: #b3b3b3;
+  border-bottom: 10px solid #b3b3b3;
+}
+
+/* Make sure rain drops are above overlays and backgrounds */
+.rain-drop {
+  z-index: 12; /* Higher than overlays and backgrounds */
+  pointer-events: auto; /* Allow clicking and dragging */
+  position: absolute;
+}
+
+/* Make sure overlays do not block the drops when hidden */
+.hidden {
+  display: none !important;
+}
+
+/* Make sure sky-background does not block pointer events */
+.sky-background {
+  z-index: 0;
+  pointer-events: none; /* Background should not block clicks */
+}
+
+/* Make sure the message overlay is only above drops when visible */
+#charity-message-overlay {
+  z-index: 10; /* Lower than .rain-drop */
+}
+
+/* The game screen background will be a single color set by JavaScript for weather.
+   This makes the top and bottom look perfectly blended. */
+.game-screen {
+  background: #b3e0fc; /* Default sky blue, will be changed by JS */
+  min-height: 100vh;
+  width: 100vw;
+  position: relative;
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* Only make the ground (grass) background transparent so the background color shows through.
+   Do NOT change the .dirt background so it stays realistic. */
+.game-screen .ground {
+  background: transparent !important;
+}
