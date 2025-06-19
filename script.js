@@ -1067,6 +1067,110 @@ function updateMisses() {
   }
 }
 
+// --- CURRENT SCORE TRACKER (for each level) ---
+
+// Helper to get the best score for the current level from localStorage
+function getBestScoreForLevel(level) {
+  // Use a unique key for each level
+  const key = `bestScore_level_${level}`;
+  // Get the value from localStorage, or 0 if not set
+  return parseInt(localStorage.getItem(key)) || 0;
+}
+
+// Helper to set the best score for the current level in localStorage
+function setBestScoreForLevel(level, score) {
+  const key = `bestScore_level_${level}`;
+  localStorage.setItem(key, score);
+}
+
+// Create the current score tracker element
+const currentScoreTracker = document.createElement('div');
+currentScoreTracker.id = 'current-score-tracker';
+// Style it to appear under the score tracker, spaced out and no word break
+currentScoreTracker.style.position = 'absolute';
+currentScoreTracker.style.top = '105px';
+currentScoreTracker.style.left = '50%';
+currentScoreTracker.style.transform = 'translateX(-50%)';
+currentScoreTracker.style.fontSize = '1.2rem';
+currentScoreTracker.style.color = '#2E9DF7';
+currentScoreTracker.style.background = 'rgba(255,255,255,0.92)';
+currentScoreTracker.style.borderRadius = '8px';
+currentScoreTracker.style.padding = '8px 32px';
+currentScoreTracker.style.zIndex = '22';
+currentScoreTracker.style.fontFamily = 'Segoe UI, Arial, sans-serif';
+currentScoreTracker.style.textAlign = 'center';
+currentScoreTracker.style.boxShadow = '0 2px 8px #0001';
+currentScoreTracker.style.display = 'none'; // Hidden by default
+currentScoreTracker.style.whiteSpace = 'nowrap';
+
+// Add the tracker to the game screen under the score tracker
+if (gameScreen && scoreDisplay) {
+  scoreDisplay.parentNode.insertBefore(currentScoreTracker, scoreDisplay.nextSibling);
+}
+
+// Helper to update the current score tracker display
+function updateCurrentScoreTracker() {
+  // Only show if the game is active and not won
+  if (gameActive && score < pointsToWin) {
+    // Get the best score for the current level
+    const bestScore = getBestScoreForLevel(level);
+    currentScoreTracker.style.display = 'block';
+    currentScoreTracker.textContent = `Best Score (Level ${level}): ${bestScore}`;
+  } else {
+    currentScoreTracker.style.display = 'none';
+  }
+}
+
+// Helper to check and update the best score after a game ends
+function checkAndUpdateBestScore() {
+  // Only update if the player beat their best score
+  const bestScore = getBestScoreForLevel(level);
+  if (score > bestScore) {
+    setBestScoreForLevel(level, score);
+  }
+  updateCurrentScoreTracker();
+}
+
+// --- Patch into game flow: show/hide and update tracker at the right times ---
+
+// Show tracker when game starts
+const originalStartGameAfterMessage = startGameAfterMessage;
+startGameAfterMessage = function() {
+  updateCurrentScoreTracker();
+  originalStartGameAfterMessage();
+};
+
+// Update tracker on score change
+const originalUpdateScore = updateScore;
+updateScore = function() {
+  originalUpdateScore();
+  updateCurrentScoreTracker();
+};
+
+// When the game ends, update the best score and hide tracker if player wins
+const originalEndGame = endGame;
+endGame = function(win) {
+  checkAndUpdateBestScore();
+  if (win) {
+    currentScoreTracker.style.display = 'none';
+  }
+  originalEndGame(win);
+};
+
+// When resetting the game, show the tracker again
+const originalResetGame = resetGame;
+resetGame = function() {
+  originalResetGame();
+  updateCurrentScoreTracker();
+};
+
+// When level changes, show the best score for the new level
+const originalSetLevel = setLevel;
+setLevel = function(lvl) {
+  originalSetLevel(lvl);
+  updateCurrentScoreTracker();
+};
+
 // --- 14. GAME LOOP & LEVEL ---
 
 function startRain() {
@@ -1262,3 +1366,102 @@ if (startButton) {
 // Remove or comment out any automatic calls to startRain()
 // For example, remove this if you see it:
 // startRain();
+
+// --- LEVEL SELECTOR DROPDOWN FOR STARTER SCREEN ---
+
+// Get the level selector button
+const levelSelectorBtn = document.getElementById('level-selector-btn');
+
+// Create the dropdown menu (hidden by default)
+let levelDropdown = document.createElement('div');
+levelDropdown.id = 'level-dropdown';
+levelDropdown.style.position = 'absolute';
+levelDropdown.style.top = '70px';
+levelDropdown.style.right = '32px';
+levelDropdown.style.background = '#fff';
+levelDropdown.style.border = '2px solid #2E9DF7';
+levelDropdown.style.borderRadius = '10px';
+levelDropdown.style.boxShadow = '0 2px 8px #0002';
+levelDropdown.style.padding = '8px 0';
+levelDropdown.style.zIndex = '1000';
+levelDropdown.style.display = 'none'; // Hidden by default
+
+// Level options for beginners
+const levels = [
+  { name: 'Easy', value: 1 },
+  { name: 'Medium', value: 2 },
+  { name: 'Hard', value: 3 },
+  { name: 'Expert', value: 4 }
+];
+
+// Add level options to the dropdown
+levels.forEach(levelObj => {
+  const option = document.createElement('div');
+  option.textContent = levelObj.name;
+  option.style.padding = '10px 32px 10px 18px';
+  option.style.cursor = 'pointer';
+  option.style.fontSize = '1.2rem';
+  option.style.color = '#2E9DF7';
+  option.style.background = '#fff';
+  option.onmouseenter = () => option.style.background = '#e3f6fd';
+  option.onmouseleave = () => option.style.background = '#fff';
+  // When a level is clicked, set the level and close the dropdown
+  option.onclick = () => {
+    setLevel(levelObj.value); // Use the existing setLevel function
+    levelDropdown.style.display = 'none';
+    // Show a simple message for feedback
+    showLevelSelectedMessage(levelObj.name);
+  };
+  levelDropdown.appendChild(option);
+});
+
+// Add the dropdown to the body (so it appears above everything)
+document.body.appendChild(levelDropdown);
+
+// Show/hide the dropdown when the button is clicked
+if (levelSelectorBtn) {
+  levelSelectorBtn.onclick = function(e) {
+    // Position the dropdown below the button
+    const rect = levelSelectorBtn.getBoundingClientRect();
+    levelDropdown.style.top = `${rect.bottom + window.scrollY + 4}px`;
+    levelDropdown.style.right = `${window.innerWidth - rect.right - 4}px`;
+    // Toggle dropdown visibility
+    levelDropdown.style.display = (levelDropdown.style.display === 'none') ? 'block' : 'none';
+    // Prevent click from closing immediately
+    e.stopPropagation();
+  };
+}
+
+// Hide the dropdown if the user clicks anywhere else
+document.addEventListener('click', function() {
+  levelDropdown.style.display = 'none';
+});
+
+// Show a message when a level is selected (for beginners)
+function showLevelSelectedMessage(levelName) {
+  // Remove any old message
+  let oldMsg = document.getElementById('level-selected-msg');
+  if (oldMsg) oldMsg.remove();
+
+  // Create a new message
+  const msg = document.createElement('div');
+  msg.id = 'level-selected-msg';
+  msg.textContent = `Level set to: ${levelName}`;
+  msg.style.position = 'absolute';
+  msg.style.top = '110px';
+  msg.style.right = '32px';
+  msg.style.background = '#2E9DF7';
+  msg.style.color = '#fff';
+  msg.style.fontSize = '1.1rem';
+  msg.style.padding = '8px 18px';
+  msg.style.borderRadius = '8px';
+  msg.style.boxShadow = '0 2px 8px #0002';
+  msg.style.zIndex = '1001';
+  document.body.appendChild(msg);
+
+  // Hide the message after 1.5 seconds
+  setTimeout(() => {
+    msg.remove();
+  }, 1500);
+}
+

@@ -778,6 +778,24 @@ h1 {
   font-family: 'Segoe UI', Arial, sans-serif;
 }
 
+#current-score-tracker {
+  position: absolute;
+  top: 105px; /* More space below score tracker */
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.2rem;
+  color: #2E9DF7;
+  background: rgba(255,255,255,0.92);
+  border-radius: 8px;
+  padding: 8px 32px;
+  z-index: 22;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  text-align: center;
+  box-shadow: 0 2px 8px #0001;
+  display: none;
+  white-space: nowrap; /* Prevent word break */
+}
+
 /* Timer display */
 #game-timer {
   position: absolute;
