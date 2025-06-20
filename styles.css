@@ -14,10 +14,32 @@ Secondary Colors:
 
 */
 
+html, body {
+  height: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   margin: 0;
   font-family: 'Segoe UI', Arial, sans-serif;
   background: #e3f6fd;
+}
+
+main {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+footer {
+  flex-shrink: 0;
 }
 
 .screen {
@@ -25,10 +47,11 @@ body {
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  min-height: 100vh;
+  height: 100%;
   width: 100vw;
   overflow: hidden;
   position: relative;
+  /* Remove min-height to prevent overflow */
 }
 
 .hidden {

@@ -25,8 +25,8 @@ gameScreen && gameScreen.appendChild(xDisplay);
 
 // --- 2. GAME STATE VARIABLES ---
 
-// Set a shorter game time for a prototype (90 seconds)
-let timeLeft = 90; // 1.5 minutes for a quick prototype game
+// Set default game time for prototype (will be overridden by setLevel)
+let timeLeft = 90; // Default: 1.5 minutes
 let timerInterval;
 let rainInterval;
 let weatherInterval;
@@ -40,8 +40,8 @@ let misses = 0;
 // Make rain a bit faster and more frequent as levels go up
 let rainSpeed = 2200;      // How fast drops fall (ms)
 let rainFrequency = 1100;  // How often drops appear (ms)
-let pointsToWin = 25; // Game ends at 25 points
-let level = 1;
+let pointsToWin = 25;      // Game ends at 25 points (default)
+let level = 1;             // Default to level 1 (Easy)
 let combo = 0;
 
 // Set different combo thresholds for each boost
@@ -50,8 +50,101 @@ const comboPointsBoost = 7;  // Every 7 in a row: points boost
 const comboXBoost = 10;      // Every 10 in a row: remove X
 
 let weather = 'normal';
-const maxMisses = 3;
+let maxMisses = 3; // Will be set by setLevel
 let currentWeatherType = 'normal';
+
+// Store the selected difficulty (default to 'easy')
+let difficulty = 'easy';
+
+// --- LEVEL SETTINGS ---
+// Each level has its own settings for time, points to win, rain speed, frequency, max misses,
+// and how many rain drops will change color when the weather changes.
+const levelSettings = {
+  1: { // Easy
+    name: 'Easy',
+    time: 120,         // 2 minutes
+    pointsToWin: 15,
+    rainSpeed: 2600,
+    rainFrequency: 1500,
+    maxMisses: 5,
+    colorSwitchChance: 0.25 // Only 25% of drops change color in weather
+  },
+  2: { // Medium
+    name: 'Medium',
+    time: 90,
+    pointsToWin: 25,
+    rainSpeed: 2200,
+    rainFrequency: 1100,
+    maxMisses: 3,
+    colorSwitchChance: 0.5 // 50% of drops change color in weather
+  },
+  3: { // Hard
+    name: 'Hard',
+    time: 60,
+    pointsToWin: 35,
+    rainSpeed: 1400,
+    rainFrequency: 800,
+    maxMisses: 2,
+    colorSwitchChance: 0.7 // 70% of drops change color in weather
+  },
+  4: { // Expert
+    name: 'Expert',
+    time: 45,
+    pointsToWin: 50,
+    rainSpeed: 1000,
+    rainFrequency: 600,
+    maxMisses: 1,
+    colorSwitchChance: 0.9 // 90% of drops change color in weather
+  }
+};
+
+// Function to set game parameters based on level
+function setLevel(lvl) {
+  // Set the current level
+  level = lvl;
+
+  // Get settings for the selected level, or default to Medium if not found
+  const settings = levelSettings[level] || levelSettings[2];
+
+  // Set game rules based on level
+  timeLeft = settings.time;
+  pointsToWin = settings.pointsToWin;
+  rainSpeed = settings.rainSpeed;
+  rainFrequency = settings.rainFrequency;
+  maxMisses = settings.maxMisses;
+  // Store color switch chance for this level
+  window.colorSwitchChance = settings.colorSwitchChance;
+
+  // Set difficulty string for reference (optional)
+  if (level === 1) {
+    difficulty = 'easy';
+  } else if (level === 2) {
+    difficulty = 'medium';
+  } else if (level === 3) {
+    difficulty = 'hard';
+  } else if (level === 4) {
+    difficulty = 'expert';
+  } else {
+    difficulty = 'medium';
+  }
+
+  // For debugging: show which level is set
+  console.log(`Level set to: ${settings.name}`);
+
+  updateLevelDisplay(); // <-- Add this line
+}
+
+// --- Optionally, update setDifficulty to use setLevel for consistency ---
+function setDifficulty(mode) {
+  // Map difficulty string to level number
+  let lvl = 2; // Default to Medium
+  if (mode === 'easy') lvl = 1;
+  else if (mode === 'medium') lvl = 2;
+  else if (mode === 'hard') lvl = 3;
+  else if (mode === 'expert') lvl = 4;
+
+  setLevel(lvl);
+}
 
 // --- 3. CONSTANTS FOR COLORS & TYPES ---
 
@@ -153,20 +246,23 @@ function startWeatherChanges() {
     currentWeatherType = newWeatherType;
     updateWeatherBackground(currentWeatherType);
 
-    // --- Set rainSpeed based on weather (fair but challenging for all devices) ---
-    let newRainSpeed;
+    // --- Set rainSpeed based on weather ---
+    // Rain falls at normal speed when weather is normal, speeds up when weather changes
     if (currentWeatherType === 'normal') {
-      newRainSpeed = 2200; // Normal speed (ms)
+      rainSpeed = levelSettings[level]?.rainSpeed || 2200;
     } else {
-      newRainSpeed = 1400; // Faster, but still fair (ms)
+      // Faster, but not impossible
+      rainSpeed = Math.max(700, (levelSettings[level]?.rainSpeed || 2200) * 0.65);
     }
-    rainSpeed = newRainSpeed;
 
-    // Switch about half the drops for the player to notice (about half)
+    // --- Only change rain drop colors if the weather is NOT normal ---
     const drops = document.querySelectorAll('.rain-drop');
     drops.forEach((drop, i) => {
-      // Switch about half the drops (every other drop)
-      if (i % 2 === 0) {
+      // Only change color if weather is not normal and random chance is met
+      if (currentWeatherType !== 'normal' && Math.random() < (window.colorSwitchChance || 0.5)) {
+        // Skip drops that are being dragged by the player
+        if (drop._dragging) return;
+
         // Get the current type of the drop
         const currentType = drop.dataset.type;
 
@@ -211,6 +307,7 @@ function startWeatherChanges() {
           glowDiv.style.background = newColor;
         }
       }
+      // If weather is normal, do not change drop color
     });
 
     // --- Show a weather message at the top of the game screen ---
@@ -1198,6 +1295,7 @@ function setLevel(lvl) {
   rainSpeed = Math.max(900, 2500 - level * 250);
   rainFrequency = Math.max(400, 1200 - level * 120);
   pointsToWin = 15 + level * 5;
+  updateLevelDisplay(); // <-- Add this line
 }
 
 // --- 15. END GAME & RESET ---
@@ -1375,16 +1473,19 @@ const levelSelectorBtn = document.getElementById('level-selector-btn');
 // Create the dropdown menu (hidden by default)
 let levelDropdown = document.createElement('div');
 levelDropdown.id = 'level-dropdown';
-levelDropdown.style.position = 'absolute';
-levelDropdown.style.top = '70px';
-levelDropdown.style.right = '32px';
-levelDropdown.style.background = '#fff';
-levelDropdown.style.border = '2px solid #2E9DF7';
-levelDropdown.style.borderRadius = '10px';
+levelDropdown.style.position = 'absolute'; // Position absolutely for placement
 levelDropdown.style.boxShadow = '0 2px 8px #0002';
 levelDropdown.style.padding = '8px 0';
 levelDropdown.style.zIndex = '1000';
 levelDropdown.style.display = 'none'; // Hidden by default
+levelDropdown.style.background = '#fff';
+levelDropdown.style.borderRadius = '8px';
+// Make sure dropdown never goes off the right edge of the screen
+levelDropdown.style.maxWidth = '220px';
+levelDropdown.style.minWidth = '140px';
+levelDropdown.style.overflow = 'hidden';
+// Prevent horizontal scroll when dropdown is open
+levelDropdown.style.boxSizing = 'border-box';
 
 // Level options for beginners
 const levels = [
@@ -1403,6 +1504,7 @@ levels.forEach(levelObj => {
   option.style.fontSize = '1.2rem';
   option.style.color = '#2E9DF7';
   option.style.background = '#fff';
+  option.style.whiteSpace = 'nowrap'; // Prevent text wrapping
   option.onmouseenter = () => option.style.background = '#e3f6fd';
   option.onmouseleave = () => option.style.background = '#fff';
   // When a level is clicked, set the level and close the dropdown
@@ -1421,12 +1523,19 @@ document.body.appendChild(levelDropdown);
 // Show/hide the dropdown when the button is clicked
 if (levelSelectorBtn) {
   levelSelectorBtn.onclick = function(e) {
-    // Position the dropdown below the button
+    // Position the dropdown just under the button
     const rect = levelSelectorBtn.getBoundingClientRect();
+    // Calculate left so dropdown never goes off the right edge
+    let left = rect.left + window.scrollX;
+    let dropdownWidth = 180;
+    if (left + dropdownWidth > window.innerWidth) {
+      left = window.innerWidth - dropdownWidth - 10;
+    }
     levelDropdown.style.top = `${rect.bottom + window.scrollY + 4}px`;
-    levelDropdown.style.right = `${window.innerWidth - rect.right - 4}px`;
-    // Toggle dropdown visibility
+    levelDropdown.style.left = `${left}px`;
     levelDropdown.style.display = (levelDropdown.style.display === 'none') ? 'block' : 'none';
+    // Prevent body from scrolling horizontally when dropdown is open
+    document.body.style.overflowX = 'hidden';
     // Prevent click from closing immediately
     e.stopPropagation();
   };
@@ -1435,6 +1544,8 @@ if (levelSelectorBtn) {
 // Hide the dropdown if the user clicks anywhere else
 document.addEventListener('click', function() {
   levelDropdown.style.display = 'none';
+  // Restore body scroll
+  document.body.style.overflowX = '';
 });
 
 // Show a message when a level is selected (for beginners)
@@ -1457,11 +1568,61 @@ function showLevelSelectedMessage(levelName) {
   msg.style.borderRadius = '8px';
   msg.style.boxShadow = '0 2px 8px #0002';
   msg.style.zIndex = '1001';
+  msg.style.whiteSpace = 'nowrap';
   document.body.appendChild(msg);
 
   // Hide the message after 1.5 seconds
   setTimeout(() => {
     msg.remove();
   }, 1500);
+}
+
+// Get the difficulty buttons from the page
+const easyBtn = document.getElementById('easy-btn');
+const mediumBtn = document.getElementById('medium-btn');
+const hardBtn = document.getElementById('hard-btn');
+const expertBtn = document.getElementById('expert-btn');
+
+// Add event listeners to each button
+if (easyBtn) {
+  easyBtn.addEventListener('click', function() {
+    setDifficulty('easy');
+    // Optional: show a message for debugging
+    console.log('Difficulty set to easy');
+  });
+}
+if (mediumBtn) {
+  mediumBtn.addEventListener('click', function() {
+    setDifficulty('medium');
+    console.log('Difficulty set to medium');
+  });
+}
+if (hardBtn) {
+  hardBtn.addEventListener('click', function() {
+    setDifficulty('hard');
+    console.log('Difficulty set to hard');
+  });
+}
+if (expertBtn) {
+  expertBtn.addEventListener('click', function() {
+    setDifficulty('expert');
+    console.log('Difficulty set to expert');
+  });
+}
+
+// Update the current level display on the game screen
+function updateLevelDisplay() {
+  // Get the level display element
+  const levelDisplay = document.getElementById('current-level-display');
+  // Get the name for the current level
+  let levelName = 'Easy';
+  if (level === 1) levelName = 'Easy';
+  else if (level === 2) levelName = 'Medium';
+  else if (level === 3) levelName = 'Hard';
+  else if (level === 4) levelName = 'Expert';
+  // Set the text
+  if (levelDisplay) {
+    levelDisplay.textContent = `Level: ${levelName}`;
+  }
 }
 
