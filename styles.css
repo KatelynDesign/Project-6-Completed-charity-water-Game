@@ -14,6 +14,11 @@ Secondary Colors:
 
 */
 
+/* Use a font stack that matches the charity: water brand */
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
 html, body {
   height: 100%;
   min-height: 100vh;
@@ -54,9 +59,7 @@ footer {
   /* Remove min-height to prevent overflow */
 }
 
-.hidden {
-  display: none;
-}
+
 
 .background-animated {
   position: absolute;
@@ -94,18 +97,9 @@ h1 {
   z-index: 1;
 }
 
-/* Level Selector button */
-#level-selector-btn {
-  position: absolute;
-  top: 32px;
-  right: 32px;
-  z-index: 2;
-  background: none;
-  border: none;
-  font-size: 2rem;
-  color: #222;
-  cursor: pointer;
-}
+
+ 
+
 
 /* Sign with game title */
 .sign {
