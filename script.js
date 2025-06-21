@@ -1343,16 +1343,40 @@ function endGame(win) {
     return;
   }
 
-  // --- WIN: If player wins on any other level, move to next level automatically ---
+  // --- WIN: If player wins on any other level, show next level overlay (same layout as message overlay) ---
   if (win && level < 4) {
-    // Show a simple alert for next level (beginner-friendly)
-    alert(`Nice job! Moving to level ${level + 1}.`);
-    setLevel(level + 1);
-    resetGame();
-    startWeatherChanges();
-    startGameTimerAndRain();
-    document.getElementById('game-screen').classList.remove('hidden');
-    document.getElementById('starter-screen').classList.add('hidden');
+    // Pause the game by stopping rain and timer
+    stopRain();
+    clearInterval(timerInterval);
+    clearInterval(weatherInterval);
+
+    const nextLevelOverlay = document.getElementById('next-level-overlay');
+    if (nextLevelOverlay) {
+      nextLevelOverlay.classList.remove('hidden');
+      // Set up Quit button
+      const quitBtnNext = document.getElementById('quit-btn-next');
+      if (quitBtnNext) {
+        quitBtnNext.onclick = function() {
+          nextLevelOverlay.classList.add('hidden');
+          resetGame();
+          document.getElementById('starter-screen').classList.remove('hidden');
+          document.getElementById('game-screen').classList.add('hidden');
+        };
+      }
+      // Wait 5 seconds, then move to next level if overlay is still visible
+      setTimeout(function() {
+        // Only move to next level if overlay is still visible (not quit)
+        if (!nextLevelOverlay.classList.contains('hidden')) {
+          nextLevelOverlay.classList.add('hidden');
+          setLevel(level + 1);
+          resetGame();
+          startWeatherChanges();
+          startGameTimerAndRain();
+          document.getElementById('game-screen').classList.remove('hidden');
+          document.getElementById('starter-screen').classList.add('hidden');
+        }
+      }, 5000);
+    }
     return;
   }
 

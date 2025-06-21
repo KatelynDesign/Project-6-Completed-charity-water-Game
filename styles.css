@@ -933,6 +933,18 @@ h1 {
   box-shadow: 0 2px 8px #F5402C66;
 }
 
+/* Responsive for next level overlay */
+@media (max-width: 600px) {
+  #next-level-overlay .overlay-content {
+    max-width: 98vw;
+    min-width: 0;
+    padding: 18px 6vw;
+  }
+  #next-level-overlay .overlay-title {
+    font-size: 1.3rem;
+  }
+}
+
 /* Responsive adjustments */
 @media (max-width: 900px) {
   .buckets-row,
