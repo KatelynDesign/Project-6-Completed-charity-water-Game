@@ -209,7 +209,7 @@ h1 {
   color: #222;
   font-weight: bold;
   cursor: pointer;
-  margin: 126px auto 0 auto;
+  margin: 70px auto 0 auto; /* Moved up */
   box-shadow: 0 4px 16px #0002;
   transition: background 0.2s;
   z-index: 2;
@@ -1162,7 +1162,18 @@ h1 {
 
 /* Make sure the message overlay is only above drops when visible */
 #charity-message-overlay {
-  z-index: 10; /* Lower than .rain-drop */
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(179,224,252,0.92) !important; /* Match lose overlay blue */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+#charity-message-overlay.hidden {
+  display: none !important;
 }
 
 /* The game screen background will be a single color set by JavaScript for weather.

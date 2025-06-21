@@ -260,12 +260,10 @@ function startWeatherChanges(customInterval) {
     }
 
     // --- Only change rain drop colors if the weather is NOT normal ---
-    const drops = document.querySelectorAll('.rain-drop');
-    drops.forEach((drop, i) => {
-      // Only change color if weather is not normal and random chance is met
-      if (currentWeatherType !== 'normal' && Math.random() < (window.colorSwitchChance || 0.5)) {
-        if (drop._dragging) return;
-
+    if (currentWeatherType !== 'normal') {
+      // Loop through all rain drops (even falling ones)
+      const drops = document.querySelectorAll('.rain-drop');
+      drops.forEach(drop => {
         // Pick a new type different from the current one
         const currentType = drop.dataset.type;
         const possibleTypes = rainTypes.filter(rt => rt.type !== currentType);
@@ -275,17 +273,20 @@ function startWeatherChanges(customInterval) {
         // Get the new color for the new type
         const newColor = getRainDropColor(newTypeObj.type);
 
-        // Update the SVG color (assume the SVG is the first child of the drop)
-        const svgDiv = drop.querySelector('.rain-drop-svg');
+        // Update the SVG to match the new type and color
+        const svgDiv = drop.children[1];
         if (svgDiv) {
-          // Update the fill color in the SVG path
-          const svg = svgDiv.querySelector('svg');
-          if (svg) {
-            const path = svg.querySelector('path');
-            if (path) {
-              path.setAttribute('fill', newColor);
-            }
-          }
+          svgDiv.innerHTML = `
+            <svg width="60" height="80" viewBox="0 0 36 48" style="display:block; pointer-events:none;">
+              <path d="M18 4
+                C18 4, 4 24, 4 34
+                a14 14 0 0 0 28 0
+                C32 24, 18 4, 18 4
+                Z"
+                fill="${newColor}" stroke="#1a1a1a" stroke-width="2"/>
+              <ellipse cx="13" cy="20" rx="5" ry="13" fill="#fff" fill-opacity="0.35" />
+            </svg>
+          `;
         }
 
         // Update the glow color as well
@@ -293,9 +294,8 @@ function startWeatherChanges(customInterval) {
         if (glowDiv) {
           glowDiv.style.background = newColor;
         }
-      }
-      // If weather is normal, do not change drop color
-    });
+      });
+    }
 
     // --- Show a weather message at the top of the game screen ---
     // Remove any previous weather message
@@ -368,20 +368,7 @@ function startWeatherChanges(customInterval) {
           // Get the new color for the new type
           const newColor = getRainDropColor(newTypeObj.type);
 
-          // Choose the correct detail for the new type
-          let detailSvg = '';
-          if (newTypeObj.type === 'clean') {
-            // Clean: white highlight stripe
-            detailSvg = `<rect x="22" y="10" width="6" height="22" rx="3" fill="#fff" fill-opacity="0.5" />`;
-          } else if (newTypeObj.type === 'dirty') {
-            // Dirty: brown dot
-            detailSvg = `<circle cx="24" cy="28" r="4" fill="#8d6e4a" fill-opacity="0.7" />`;
-          } else if (newTypeObj.type === 'unknown') {
-            // Unknown: gray swirl
-            detailSvg = `<path d="M18 24 Q22 28 18 32 Q14 36 18 40" stroke="#b0b7c6" stroke-width="2" fill="none" />`;
-          }
-
-          // Update the SVG to match the new type and detail
+          // --- Only show the main drop shape and color, no extra detail ---
           const svgDiv = drop.children[1];
           if (svgDiv) {
             svgDiv.innerHTML = `
@@ -393,7 +380,6 @@ function startWeatherChanges(customInterval) {
                   Z"
                   fill="${newColor}" stroke="#1a1a1a" stroke-width="2"/>
                 <ellipse cx="13" cy="20" rx="5" ry="13" fill="#fff" fill-opacity="0.35" />
-                ${detailSvg}
               </svg>
             `;
           }
@@ -548,15 +534,7 @@ function createRainDrop() {
 
   // --- Add the SVG for the drop (SVG has pointer-events: none) ---
   const svg = document.createElement('div');
-  // Add a simple visual detail for each type
-  let detailSvg = '';
-  if (rainType.type === 'clean') {
-    detailSvg = `<rect x="22" y="10" width="6" height="22" rx="3" fill="#fff" fill-opacity="0.5" />`;
-  } else if (rainType.type === 'dirty') {
-    detailSvg = `<circle cx="24" cy="28" r="4" fill="#8d6e4a" fill-opacity="0.7" />`;
-  } else if (rainType.type === 'unknown') {
-    detailSvg = `<path d="M18 24 Q22 28 18 32 Q14 36 18 40" stroke="#b0b7c6" stroke-width="2" fill="none" />`;
-  }
+  // Only show the main drop shape and color, no extra detail
   svg.innerHTML = `
     <svg width="60" height="80" viewBox="0 0 36 48" style="display:block; pointer-events:none;">
       <path d="M18 4
@@ -566,7 +544,6 @@ function createRainDrop() {
         Z"
         fill="${color}" stroke="#1a1a1a" stroke-width="2"/>
       <ellipse cx="13" cy="20" rx="5" ry="13" fill="#fff" fill-opacity="0.35" />
-      ${detailSvg}
     </svg>
   `;
   svg.style.position = 'relative';
