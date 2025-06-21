@@ -232,9 +232,9 @@ function updateWeatherBackground(type) {
   }
 }
 
-function startWeatherChanges() {
-  // Weather changes a bit more often as level increases, but not too fast
-  let weatherChangeInterval = Math.max(3500, 9000 - level * 800);
+function startWeatherChanges(customInterval) {
+  // Use custom interval if provided, otherwise use default logic
+  let weatherChangeInterval = customInterval || Math.max(3500, 9000 - level * 800);
   weatherInterval = setInterval(() => {
     const weatherTypes = ['normal', 'storm', 'sunny', 'random'];
     let newWeatherType;
@@ -249,8 +249,14 @@ function startWeatherChanges() {
     if (currentWeatherType === 'normal') {
       rainSpeed = levelSettings[level]?.rainSpeed || 2200;
     } else {
-      // Faster, but not impossible
-      rainSpeed = Math.max(700, (levelSettings[level]?.rainSpeed || 2200) * 0.65);
+      // For Hard and Expert, don't make it too fast
+      if (level === 3) {
+        rainSpeed = Math.max(1100, (levelSettings[level]?.rainSpeed || 1400) * 0.8); // slower than before
+      } else if (level === 4) {
+        rainSpeed = Math.max(900, (levelSettings[level]?.rainSpeed || 1000) * 0.85); // slower than before
+      } else {
+        rainSpeed = Math.max(700, (levelSettings[level]?.rainSpeed || 2200) * 0.65);
+      }
     }
 
     // --- Only change rain drop colors if the weather is NOT normal ---
@@ -275,10 +281,13 @@ function startWeatherChanges() {
         // Choose the correct detail for the new type
         let detailSvg = '';
         if (newTypeObj.type === 'clean') {
+          // Clean: white highlight stripe
           detailSvg = `<rect x="22" y="10" width="6" height="22" rx="3" fill="#fff" fill-opacity="0.5" />`;
         } else if (newTypeObj.type === 'dirty') {
+          // Dirty: brown dot
           detailSvg = `<circle cx="24" cy="28" r="4" fill="#8d6e4a" fill-opacity="0.7" />`;
         } else if (newTypeObj.type === 'unknown') {
+          // Unknown: gray swirl
           detailSvg = `<path d="M18 24 Q22 28 18 32 Q14 36 18 40" stroke="#b0b7c6" stroke-width="2" fill="none" />`;
         }
 
@@ -1425,70 +1434,42 @@ function startGameAfterMessage() {
 // Each function sets up the game for a specific level and starts it.
 // When the player wins, the next level starts automatically.
 
-// Easy Level (prototype)
+// Easy Level (now matches other levels' logic)
 function easyLevel() {
-  setLevel(1);
+  setLevel(1); // Set to Easy
   resetGame();
   startWeatherChanges();
   startGameTimerAndRain();
+  // No custom endGame override for Easy, use default
 }
 
 // Medium Level
 function mediumLevel() {
-  setLevel(2); // This sets all the correct settings for Medium
+  setLevel(2); // Set to Medium
   resetGame();
   startWeatherChanges();
   startGameTimerAndRain();
-  endGame = function(win) {
-    if (win) {
-      hardLevel(); // Move to Hard
-    } else {
-      stopRain();
-      clearInterval(timerInterval);
-      clearInterval(weatherInterval);
-      // ...existing lose overlay code...
-    }
-  };
+  // You can add a custom endGame override if you want auto-progression
 }
 
-// Hard Level
+// Hard Level (Level 3) - Adjusted for better balance
 function hardLevel() {
-  setLevel(3); // This sets all the correct settings for Hard
+  setLevel(3); // Set to Hard
   resetGame();
-  startWeatherChanges();
+  // Start weather changes with a slightly longer interval for balance
+  startWeatherChanges(7000); // 7 seconds between weather changes
   startGameTimerAndRain();
-  endGame = function(win) {
-    if (win) {
-      expertLevel(); // Move to Expert
-    } else {
-      stopRain();
-      clearInterval(timerInterval);
-      clearInterval(weatherInterval);
-      // ...existing lose overlay code...
-    }
-  };
+  // You can add a custom endGame override if you want auto-progression
 }
 
-// Expert Level
+// Expert Level (Level 4) - Adjusted for better balance
 function expertLevel() {
-  setLevel(4); // This sets all the correct settings for Expert
+  setLevel(4); // Set to Expert
   resetGame();
-  startWeatherChanges();
+  // Start weather changes with a longer interval for balance
+  startWeatherChanges(9000); // 9 seconds between weather changes
   startGameTimerAndRain();
-  endGame = function(win) {
-    if (win) {
-      // Show a final win overlay or message
-      stopRain();
-      clearInterval(timerInterval);
-      clearInterval(weatherInterval);
-      // ...existing win overlay code...
-    } else {
-      stopRain();
-      clearInterval(timerInterval);
-      clearInterval(weatherInterval);
-      // ...existing lose overlay code...
-    }
-  };
+  // You can add a custom endGame override if you want auto-progression
 }
 
 // When the start button is clicked, show the game screen and the message overlay
