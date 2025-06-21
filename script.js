@@ -168,43 +168,41 @@ const rainTypes = [
 
 // --- 4. TIMER FUNCTIONS ---
 
-function startGameTimer() {
-  timerDisplay.textContent = '1:30';
-  clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-    if (timeLeft <= 0) {
-      clearInterval(timerInterval);
-      clearInterval(rainInterval);
-      timerDisplay.textContent = '0:00';
-      // You can add more logic here for when the timer ends
-    }
-    timeLeft--;
-  }, 1000);
-}
-
+// This function starts the timer and the rain for the current level.
+// It uses the correct timeLeft, rainFrequency, and rainSpeed for each level.
 function startGameTimerAndRain() {
-  timeLeft = 90;
-  timerDisplay.textContent = '1:30';
+  // Set the timer to the correct value for this level
+  timeLeft = levelSettings[level].time;
+  // Show the timer in MM:SS format
+  let minutes = Math.floor(timeLeft / 60);
+  let seconds = timeLeft % 60;
+  timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+  // Clear any previous intervals
   clearInterval(timerInterval);
   clearInterval(rainInterval);
+
+  // Start the game
   gameActive = true;
+
+  // Start the rain interval using the correct frequency for this level
   rainInterval = setInterval(() => {
     createRainDrop();
-  }, rainFrequency);
+  }, levelSettings[level].rainFrequency);
+
+  // Start the timer interval
   timerInterval = setInterval(() => {
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
+    timeLeft--;
+    let minutes = Math.floor(timeLeft / 60);
+    let seconds = timeLeft % 60;
     timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     if (timeLeft <= 0) {
       clearInterval(timerInterval);
       clearInterval(rainInterval);
       timerDisplay.textContent = '0:00';
-      // Add more logic here for when the timer ends
+      // End the game if time runs out
+      endGame(false);
     }
-    timeLeft--;
   }, 1000);
 }
 
@@ -446,21 +444,19 @@ function startWeatherChanges() {
 
 // --- Make sure drops are reset properly when the game is reset ---
 function resetGame() {
-  // Reset score and timer for a new game
-  // Reset for prototype values
+  // Reset score and misses for a new game
   score = 0;
   misses = 0;
   combo = 0;
-  level = 1;
-  weather = 'normal';
-  timeLeft = 90;
-  pointsToWin = 25;
-  rainSpeed = 2200;
-  rainFrequency = 1100;
+  // Do NOT reset level, timeLeft, pointsToWin, rainSpeed, rainFrequency here!
   updateScore();
   updateMisses();
   if (scoreDisplay) scoreDisplay.textContent = '0';
-  if (timerDisplay) timerDisplay.textContent = '1:30';
+  if (timerDisplay) {
+    let minutes = Math.floor(levelSettings[level].time / 60);
+    let seconds = levelSettings[level].time % 60;
+    timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  }
   // Set background to normal while charity message is on display
   updateWeatherBackground('normal');
   document.querySelectorAll('.rain-drop').forEach(drop => drop.remove());
@@ -1474,15 +1470,8 @@ function startGameAfterMessage() {
 
 // Easy Level (prototype)
 function easyLevel() {
-  // Set variables for Easy
-  level = 1;
-  timeLeft = 120; // 2 minutes
-  pointsToWin = 15;
-  rainSpeed = 2600;
-  rainFrequency = 1500;
-  maxMisses = 5;
-  difficulty = 'easy';
-  // Reset and start the game
+  // Set the level number
+  setLevel(1); // This sets all the correct settings for Easy
   resetGame();
   startWeatherChanges();
   startGameTimerAndRain();
@@ -1491,7 +1480,6 @@ function easyLevel() {
     if (win) {
       mediumLevel(); // Move to Medium
     } else {
-      // Show lose overlay as usual
       stopRain();
       clearInterval(timerInterval);
       clearInterval(weatherInterval);
@@ -1502,13 +1490,7 @@ function easyLevel() {
 
 // Medium Level
 function mediumLevel() {
-  level = 2;
-  timeLeft = 90; // 1.5 minutes
-  pointsToWin = 25;
-  rainSpeed = 2200;
-  rainFrequency = 1100;
-  maxMisses = 3;
-  difficulty = 'medium';
+  setLevel(2); // This sets all the correct settings for Medium
   resetGame();
   startWeatherChanges();
   startGameTimerAndRain();
@@ -1526,13 +1508,7 @@ function mediumLevel() {
 
 // Hard Level
 function hardLevel() {
-  level = 3;
-  timeLeft = 60; // 1 minute
-  pointsToWin = 35;
-  rainSpeed = 1400;
-  rainFrequency = 800;
-  maxMisses = 2;
-  difficulty = 'hard';
+  setLevel(3); // This sets all the correct settings for Hard
   resetGame();
   startWeatherChanges();
   startGameTimerAndRain();
@@ -1550,13 +1526,7 @@ function hardLevel() {
 
 // Expert Level
 function expertLevel() {
-  level = 4;
-  timeLeft = 45; // 45 seconds
-  pointsToWin = 50;
-  rainSpeed = 1000;
-  rainFrequency = 600;
-  maxMisses = 1;
-  difficulty = 'expert';
+  setLevel(4); // This sets all the correct settings for Expert
   resetGame();
   startWeatherChanges();
   startGameTimerAndRain();
