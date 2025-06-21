@@ -1296,12 +1296,11 @@ function setLevel(lvl) {
 
 // --- 15. END GAME & RESET ---
 
-// This function ends the game. The player only wins if their score is 25 or more.
+// This function ends the game and shows the correct overlay.
 function endGame(win) {
-  // Only allow a win if the score is at least 25
-  if (win && score < 25) {
-    // If called by mistake, just return and do nothing
-    return;
+  // Only allow a win if the score is at least the points needed for this level
+  if (win && score < pointsToWin) {
+    return; // Not enough points to win
   }
 
   // Stop rain and timers
@@ -1309,148 +1308,82 @@ function endGame(win) {
   clearInterval(timerInterval);
   clearInterval(weatherInterval);
 
-  // --- If player wins on Expert level, show the win overlay ---
-  if (win && level === 4) {
-    // Show the win overlay on the game screen
-    let winOverlay = document.getElementById('win-overlay');
-    if (!winOverlay) {
-      winOverlay = document.createElement('div');
-      winOverlay.id = 'win-overlay';
-      winOverlay.classList.add('overlay', 'hidden');
-      winOverlay.innerHTML = `
-        <div class="overlay-content">
-          <h2>Congratulations!</h2>
-          <p>Thx 4 playing</p>
-          <img src="img/charity_water_logo_white2.jpg" alt="charity: water logo">
-          <blockquote>
-            Thank you for showing empathy and making a difference with charity: water."
-          </blockquote>
-          <div class="overlay-buttons">
-            <button id="play-again-btn">Play Again</button>
-            <button id="quit-btn">Quit</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(winOverlay);
-    } else {
-      winOverlay.classList.remove('hidden');
-    }
-    document.getElementById('play-again-btn').onclick = function() {
-      winOverlay.classList.add('hidden');
-      resetGame();
-      setLevel(level);
-      startWeatherChanges();
-      startGameTimerAndRain();
-      document.getElementById('game-screen').classList.remove('hidden');
-      document.getElementById('starter-screen').classList.add('hidden');
-    };
-    document.getElementById('quit-btn').onclick = function() {
-      winOverlay.classList.add('hidden');
-      resetGame();
-      document.getElementById('starter-screen').classList.remove('hidden');
-      document.getElementById('game-screen').classList.add('hidden');
-    };
-    return;
-  }
+  // Hide overlays first
+  const winOverlay = document.getElementById('win-overlay');
+  const loseOverlay = document.getElementById('lose-overlay');
+  if (winOverlay) winOverlay.classList.add('hidden');
+  if (loseOverlay) loseOverlay.classList.add('hidden');
 
-  // --- If player wins on any other level, move to next level automatically ---
-  if (win && level < 4) {
-    // Create a message overlay for moving to the next level
-    let nextLevelOverlay = document.getElementById('next-level-overlay');
-    if (!nextLevelOverlay) {
-      nextLevelOverlay = document.createElement('div');
-      nextLevelOverlay.id = 'next-level-overlay';
-      nextLevelOverlay.classList.add('overlay');
-      // Use the same structure and classes as other overlays
-      nextLevelOverlay.innerHTML = `
-        <div class="overlay-content">
-          <h2 class="overlay-title" style="color:#2E9DF7;">Nice Job. Let's move on to the next level!</h2>
-          <img class="overlay-logo" src="img/charity_water_logo_white2.jpg" alt="charity: water logo" style="height:54px; margin-bottom:18px; margin-top:0; background:#222; border-radius:8px;" />
-          <div class="overlay-message">
-            "Every level you complete helps bring clean water to more people. Thank you for making a difference!"<br>
-            <span style='color:#159A48;font-weight:bold;'>- charity: water</span>
-          </div>
-          <div class="overlay-buttons">
-            <button class="overlay-btn quit" id="quit-next-level-btn">Quit</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(nextLevelOverlay);
-    } else {
-      nextLevelOverlay.style.display = 'flex';
+  // --- WIN: If player wins on Expert level, show the win overlay ---
+  if (win && level === 4) {
+    if (winOverlay) winOverlay.classList.remove('hidden');
+    // Play Again button
+    const playAgainBtn = document.getElementById('play-again-btn');
+    if (playAgainBtn) {
+      playAgainBtn.onclick = function() {
+        winOverlay.classList.add('hidden');
+        resetGame();
+        setLevel(1); // Restart at level 1
+        startWeatherChanges();
+        startGameTimerAndRain();
+        document.getElementById('game-screen').classList.remove('hidden');
+        document.getElementById('starter-screen').classList.add('hidden');
+      };
     }
-    // Add event listener for the quit button
-    const quitBtn = document.getElementById('quit-next-level-btn');
+    // Quit button
+    const quitBtn = document.getElementById('quit-btn');
     if (quitBtn) {
       quitBtn.onclick = function() {
-        nextLevelOverlay.style.display = 'none';
+        winOverlay.classList.add('hidden');
         resetGame();
         document.getElementById('starter-screen').classList.remove('hidden');
         document.getElementById('game-screen').classList.add('hidden');
       };
     }
-    // After 8 seconds, hide the overlay and move to the next level if not quit
-    setTimeout(() => {
-      if (nextLevelOverlay.style.display !== 'none') {
-        nextLevelOverlay.style.display = 'none';
-        setLevel(level + 1); // Move to next level
+    return;
+  }
+
+  // --- WIN: If player wins on any other level, move to next level automatically ---
+  if (win && level < 4) {
+    // Show a simple alert for next level (beginner-friendly)
+    alert(`Nice job! Moving to level ${level + 1}.`);
+    setLevel(level + 1);
+    resetGame();
+    startWeatherChanges();
+    startGameTimerAndRain();
+    document.getElementById('game-screen').classList.remove('hidden');
+    document.getElementById('starter-screen').classList.add('hidden');
+    return;
+  }
+
+  // --- LOSE: Show overlay if player loses (gets too many Xs) ---
+  if (!win) {
+    if (loseOverlay) loseOverlay.classList.remove('hidden');
+    // Play Again button
+    const playAgainBtnLose = document.getElementById('play-again-btn-lose');
+    if (playAgainBtnLose) {
+      playAgainBtnLose.onclick = function() {
+        loseOverlay.classList.add('hidden');
         resetGame();
+        setLevel(level);
         startWeatherChanges();
         startGameTimerAndRain();
-      }
-    }, 8000);
-    return;
-  }
-
-  // Show overlay if player loses (gets 3 Xs)
-  if (!win) {
-    let loseOverlay = document.getElementById('lose-overlay');
-    if (!loseOverlay) {
-      loseOverlay = document.createElement('div');
-      loseOverlay.id = 'lose-overlay';
-      loseOverlay.classList.add('overlay', 'hidden');
-      loseOverlay.innerHTML = `
-        <div class="overlay-content">
-          <h2>Try again?</h2>
-          <img src="img/charity_water_logo_white2.jpg" alt="charity: water logo">
-          <blockquote>
-            "Don't give up! Every try brings us closer to a world where everyone has clean water.<br>
-            Your empathy and hope can change lives. Let's make a difference together!"
-          </blockquote>
-          <div class="overlay-buttons">
-            <button id="play-again-btn-lose">Play Again</button>
-            <button id="quit-btn-lose">Quit</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(loseOverlay);
-    } else {
-      loseOverlay.classList.remove('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
+        document.getElementById('starter-screen').classList.add('hidden');
+      };
     }
-    document.getElementById('play-again-btn-lose').onclick = function() {
-      loseOverlay.classList.add('hidden');
-      resetGame();
-      setLevel(level);
-      startWeatherChanges();
-      startGameTimerAndRain();
-      document.getElementById('game-screen').classList.remove('hidden');
-      document.getElementById('starter-screen').classList.add('hidden');
-    };
-    document.getElementById('quit-btn-lose').onclick = function() {
-      loseOverlay.classList.add('hidden');
-      resetGame();
-      document.getElementById('starter-screen').classList.remove('hidden');
-      document.getElementById('game-screen').classList.add('hidden');
-    };
+    // Quit button
+    const quitBtnLose = document.getElementById('quit-btn-lose');
+    if (quitBtnLose) {
+      quitBtnLose.onclick = function() {
+        loseOverlay.classList.add('hidden');
+        resetGame();
+        document.getElementById('starter-screen').classList.remove('hidden');
+        document.getElementById('game-screen').classList.add('hidden');
+      };
+    }
     return;
   }
-
-  // Reset the game after a short delay
-  setTimeout(() => {
-    resetGame();
-    document.getElementById('starter-screen').classList.remove('hidden');
-    document.getElementById('game-screen').classList.add('hidden');
-  }, 2000);
 }
 
 // --- 16. GAME START HANDLING ---
@@ -1470,22 +1403,10 @@ function startGameAfterMessage() {
 
 // Easy Level (prototype)
 function easyLevel() {
-  // Set the level number
-  setLevel(1); // This sets all the correct settings for Easy
+  setLevel(1);
   resetGame();
   startWeatherChanges();
   startGameTimerAndRain();
-  // Override endGame to move to next level on win
-  endGame = function(win) {
-    if (win) {
-      mediumLevel(); // Move to Medium
-    } else {
-      stopRain();
-      clearInterval(timerInterval);
-      clearInterval(weatherInterval);
-      // ...existing lose overlay code...
-    }
-  };
 }
 
 // Medium Level
@@ -1551,6 +1472,7 @@ function expertLevel() {
   startBtn.onclick = function() {
     // Hide the starter screen
     document.getElementById('starter-screen').classList.add('hidden');
+    // Show the game screen
     // Show the game screen
     document.getElementById('game-screen').classList.remove('hidden');
     // Show the charity: water message overlay (with logo and message)
