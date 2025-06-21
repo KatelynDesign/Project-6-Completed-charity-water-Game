@@ -264,13 +264,10 @@ function startWeatherChanges(customInterval) {
     drops.forEach((drop, i) => {
       // Only change color if weather is not normal and random chance is met
       if (currentWeatherType !== 'normal' && Math.random() < (window.colorSwitchChance || 0.5)) {
-        // Skip drops that are being dragged by the player
         if (drop._dragging) return;
 
-        // Get the current type of the drop
-        const currentType = drop.dataset.type;
-
         // Pick a new type different from the current one
+        const currentType = drop.dataset.type;
         const possibleTypes = rainTypes.filter(rt => rt.type !== currentType);
         const newTypeObj = possibleTypes[Math.floor(Math.random() * possibleTypes.length)];
         drop.dataset.type = newTypeObj.type;
@@ -278,34 +275,17 @@ function startWeatherChanges(customInterval) {
         // Get the new color for the new type
         const newColor = getRainDropColor(newTypeObj.type);
 
-        // Choose the correct detail for the new type
-        let detailSvg = '';
-        if (newTypeObj.type === 'clean') {
-          // Clean: white highlight stripe
-          detailSvg = `<rect x="22" y="10" width="6" height="22" rx="3" fill="#fff" fill-opacity="0.5" />`;
-        } else if (newTypeObj.type === 'dirty') {
-          // Dirty: brown dot
-          detailSvg = `<circle cx="24" cy="28" r="4" fill="#8d6e4a" fill-opacity="0.7" />`;
-        } else if (newTypeObj.type === 'unknown') {
-          // Unknown: gray swirl
-          detailSvg = `<path d="M18 24 Q22 28 18 32 Q14 36 18 40" stroke="#b0b7c6" stroke-width="2" fill="none" />`;
-        }
-
-        // Update the SVG to match the new type and detail
-        const svgDiv = drop.children[1];
+        // Update the SVG color (assume the SVG is the first child of the drop)
+        const svgDiv = drop.querySelector('.rain-drop-svg');
         if (svgDiv) {
-          svgDiv.innerHTML = `
-            <svg width="60" height="80" viewBox="0 0 36 48" style="display:block; pointer-events:none;">
-              <path d="M18 4
-                C18 4, 4 24, 4 34
-                a14 14 0 0 0 28 0
-                C32 24, 18 4, 18 4
-                Z"
-                fill="${newColor}" stroke="#1a1a1a" stroke-width="2"/>
-              <ellipse cx="13" cy="20" rx="5" ry="13" fill="#fff" fill-opacity="0.35" />
-              ${detailSvg}
-            </svg>
-          `;
+          // Update the fill color in the SVG path
+          const svg = svgDiv.querySelector('svg');
+          if (svg) {
+            const path = svg.querySelector('path');
+            if (path) {
+              path.setAttribute('fill', newColor);
+            }
+          }
         }
 
         // Update the glow color as well
