@@ -232,10 +232,28 @@ function updateWeatherBackground(type) {
   }
 }
 
+// Track the current weather event globally
+let currentWeatherEventId = 0;
+
 function startWeatherChanges(customInterval) {
-  // Use custom interval if provided, otherwise use default logic
-  let weatherChangeInterval = customInterval || Math.max(3500, 9000 - level * 800);
+  // Set the weather change interval based on level for challenge and fairness
+  let weatherChangeInterval;
+  if (level === 1) {
+    weatherChangeInterval = 7000; // Easy: weather changes every 7 seconds
+  } else if (level === 2) {
+    weatherChangeInterval = 6000; // Medium: every 6 seconds
+  } else if (level === 3) {
+    weatherChangeInterval = 5500; // Hard: every 5.5 seconds
+  } else if (level === 4) {
+    weatherChangeInterval = 5000; // Expert: every 5 seconds
+  } else {
+    weatherChangeInterval = 7000; // Default
+  }
+  // Allow custom interval if provided
+  if (customInterval) weatherChangeInterval = customInterval;
+
   weatherInterval = setInterval(() => {
+    // Pick a new weather type different from the current one
     const weatherTypes = ['normal', 'storm', 'sunny', 'random'];
     let newWeatherType;
     do {
@@ -244,24 +262,28 @@ function startWeatherChanges(customInterval) {
     currentWeatherType = newWeatherType;
     updateWeatherBackground(currentWeatherType);
 
-    // --- Set rainSpeed based on weather ---
-    // Rain falls at normal speed when weather is normal, speeds up when weather changes
+    // Set rain speed based on weather and level
     if (currentWeatherType === 'normal') {
+      // Normal weather: use the default rain speed for the level
       rainSpeed = levelSettings[level]?.rainSpeed || 2200;
     } else {
-      // For Hard and Expert, don't make it too fast
-      if (level === 3) {
-        rainSpeed = Math.max(1100, (levelSettings[level]?.rainSpeed || 1400) * 0.8); // slower than before
+      // Weather event: make rain fall faster, but keep it fair and playable
+      if (level === 1) {
+        rainSpeed = Math.max(2000, (levelSettings[level]?.rainSpeed || 2600) * 0.8); // Easy: not too fast
+      } else if (level === 2) {
+        rainSpeed = Math.max(1500, (levelSettings[level]?.rainSpeed || 2200) * 0.7); // Medium: a bit faster
+      } else if (level === 3) {
+        rainSpeed = Math.max(1100, (levelSettings[level]?.rainSpeed || 1400) * 0.65); // Hard: challenging but fair
       } else if (level === 4) {
-        rainSpeed = Math.max(900, (levelSettings[level]?.rainSpeed || 1000) * 0.85); // slower than before
+        rainSpeed = Math.max(900, (levelSettings[level]?.rainSpeed || 1000) * 0.6); // Expert: fast but not impossible
       } else {
-        rainSpeed = Math.max(700, (levelSettings[level]?.rainSpeed || 2200) * 0.65);
+        rainSpeed = Math.max(1200, (levelSettings[level]?.rainSpeed || 2200) * 0.7);
       }
     }
 
-    // --- Only change rain drop colors if the weather is NOT normal ---
+    // --- Change ALL raindrop colors when the weather changes (except normal) ---
     if (currentWeatherType !== 'normal') {
-      // Loop through all rain drops (even falling ones)
+      // Get all raindrops on the screen
       const drops = document.querySelectorAll('.rain-drop');
       drops.forEach(drop => {
         // Pick a new type different from the current one
@@ -269,10 +291,8 @@ function startWeatherChanges(customInterval) {
         const possibleTypes = rainTypes.filter(rt => rt.type !== currentType);
         const newTypeObj = possibleTypes[Math.floor(Math.random() * possibleTypes.length)];
         drop.dataset.type = newTypeObj.type;
-
         // Get the new color for the new type
         const newColor = getRainDropColor(newTypeObj.type);
-
         // Update the SVG to match the new type and color
         const svgDiv = drop.children[1];
         if (svgDiv) {
@@ -288,7 +308,6 @@ function startWeatherChanges(customInterval) {
             </svg>
           `;
         }
-
         // Update the glow color as well
         const glowDiv = drop.children[0];
         if (glowDiv) {
@@ -296,13 +315,11 @@ function startWeatherChanges(customInterval) {
         }
       });
     }
+    // If weather is normal, do NOT change raindrop colors (they stay the same)
 
     // --- Show a weather message at the top of the game screen ---
-    // Remove any previous weather message
     let oldMsg = document.getElementById('weather-message');
     if (oldMsg) oldMsg.remove();
-
-    // Pick a message based on the weather type
     let weatherMsg = '';
     if (currentWeatherType === 'storm') {
       weatherMsg = 'Warning: Thunder Storm! Watch out for tricky drops!';
@@ -313,12 +330,9 @@ function startWeatherChanges(customInterval) {
     } else {
       weatherMsg = 'Normal weather. Stay focused!';
     }
-
-    // Create and show the weather message
     const msgDiv = document.createElement('div');
     msgDiv.id = 'weather-message';
     msgDiv.textContent = weatherMsg;
-    // Place weather message at the very top
     msgDiv.style.position = 'absolute';
     msgDiv.style.top = '12px';
     msgDiv.style.left = '50%';
@@ -346,74 +360,6 @@ function startWeatherChanges(customInterval) {
       msgDiv.remove();
     }, 4000);
     gameScreen.appendChild(msgDiv);
-
-    // Only change rain drops if the weather is NOT normal
-    if (currentWeatherType !== 'normal') {
-      const drops = document.querySelectorAll('.rain-drop');
-      drops.forEach(drop => {
-        // Skip drops that are being dragged by the player
-        if (drop._dragging) {
-          return;
-        }
-
-        if (Math.random() < 0.5) {
-          // Get the current type of the drop
-          const currentType = drop.dataset.type;
-
-          // Pick a new type different from the current one
-          const possibleTypes = rainTypes.filter(rt => rt.type !== currentType);
-          const newTypeObj = possibleTypes[Math.floor(Math.random() * possibleTypes.length)];
-          drop.dataset.type = newTypeObj.type;
-
-          // Get the new color for the new type
-          const newColor = getRainDropColor(newTypeObj.type);
-
-          // --- Only show the main drop shape and color, no extra detail ---
-          const svgDiv = drop.children[1];
-          if (svgDiv) {
-            svgDiv.innerHTML = `
-              <svg width="60" height="80" viewBox="0 0 36 48" style="display:block; pointer-events:none;">
-                <path d="M18 4
-                  C18 4, 4 24, 4 34
-                  a14 14 0 0 0 28 0
-                  C32 24, 18 4, 18 4
-                  Z"
-                  fill="${newColor}" stroke="#1a1a1a" stroke-width="2"/>
-                <ellipse cx="13" cy="20" rx="5" ry="13" fill="#fff" fill-opacity="0.35" />
-              </svg>
-            `;
-          }
-
-          // Update the glow color as well
-          const glowDiv = drop.children[0];
-          if (glowDiv) {
-            glowDiv.style.background = newColor;
-          }
-        }
-      });
-    }
-
-    // Randomly shuffle the meaning of rain drop types (color mapping)
-    const types = ['clean', 'dirty', 'unknown'];
-    for (let i = types.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [types[i], types[j]] = [types[j], types[i]];
-    }
-    const numToChange = Math.random() < 0.5 ? 1 : 2;
-    const toChange = types.slice(0, numToChange);
-
-    let newMap = { ...rainColorMap };
-    toChange.forEach(type => {
-      const otherColors = types.filter(t => t !== rainColorMap[type]);
-      newMap[type] = otherColors[Math.floor(Math.random() * otherColors.length)];
-    });
-
-    const colorSet = new Set(Object.values(newMap));
-    if (colorSet.size === 3) {
-      rainColorMap = newMap;
-      // No combo message here, weather message is shown instead
-    }
-    // else: no message, just weather message
   }, weatherChangeInterval);
 }
 
@@ -515,6 +461,27 @@ function createRainDrop() {
   drop.style.border = 'none';
   drop.style.boxShadow = 'none';
   drop._handled = false; // This helps us count each drop only once
+  // --- New: When a drop is created, check if it should change color for the current weather event ---
+  if (currentWeatherType !== 'normal') {
+    // Give each new drop a random chance to change color, just like existing drops
+    let changeChance = 0.5; // Default
+    if (level === 1) changeChance = 0.3;
+    if (level === 2) changeChance = 0.5;
+    if (level === 3) changeChance = 0.7;
+    if (level === 4) changeChance = 0.9;
+    if (Math.random() < changeChance) {
+      // Pick a new type different from the current one
+      const currentType = drop.dataset.type;
+      const possibleTypes = rainTypes.filter(rt => rt.type !== currentType);
+      const newTypeObj = possibleTypes[Math.floor(Math.random() * possibleTypes.length)];
+      drop.dataset.type = newTypeObj.type;
+      color = getRainDropColor(newTypeObj.type);
+    }
+    // Mark this drop with the current weather event
+    drop._lastWeatherEventId = currentWeatherEventId;
+  } else {
+    drop._lastWeatherEventId = 0;
+  }
 
   // --- Add a circular glow element (hidden by default) ---
   const glow = document.createElement('div');
@@ -1442,7 +1409,6 @@ function expertLevel() {
     // Hide the starter screen
     document.getElementById('starter-screen').classList.add('hidden');
     // Show the game screen
-    // Show the game screen
     document.getElementById('game-screen').classList.remove('hidden');
     // Show the charity: water message overlay (with logo and message)
     messageOverlay.classList.remove('hidden');
@@ -1450,6 +1416,10 @@ function expertLevel() {
     messageOverlay.style.backgroundColor = 'rgba(0,0,0,0.65)';
     // --- Reset game state and background while overlay is visible ---
     resetGame();
+    // Always set timer to Easy level time (2:00) during the overlay
+    if (timerDisplay) {
+      timerDisplay.textContent = '2:00';
+    }
     // Wait 8 seconds, then hide the message and start the game
     setTimeout(function() {
       // Hide the message overlay (but keep its content for next time)
