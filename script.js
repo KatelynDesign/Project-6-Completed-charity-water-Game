@@ -62,21 +62,23 @@ let difficulty = 'easy';
 const levelSettings = {
   1: { // Easy
     name: 'Easy',
-    time: 120,         // 2 minutes
+    time: 60, // 1 minute
     pointsToWin: 15,
     rainSpeed: 2600,
     rainFrequency: 1500,
-    maxMisses: 5,
-    colorSwitchChance: 0.25 // Only 25% of drops change color in weather
+    maxMisses: 3,
+    colorSwitchChance: 0.25, // Only 25% of drops change color in weather
+    weatherChangeInterval: 7000 // Weather changes every 7 seconds
   },
   2: { // Medium
     name: 'Medium',
-    time: 90,
+    time: 40,
     pointsToWin: 25,
     rainSpeed: 2200,
     rainFrequency: 1100,
     maxMisses: 3,
-    colorSwitchChance: 0.5 // 50% of drops change color in weather
+    colorSwitchChance: 0.5, // 50% of drops change color in weather
+    weatherChangeInterval: 6000 // Weather changes every 6 seconds
   },
   3: { // Hard
     name: 'Hard',
@@ -84,8 +86,9 @@ const levelSettings = {
     pointsToWin: 35,
     rainSpeed: 1400,
     rainFrequency: 800,
-    maxMisses: 2,
-    colorSwitchChance: 0.7 // 70% of drops change color in weather
+    maxMisses: 3,
+    colorSwitchChance: 0.7, // 70% of drops change color in weather
+    weatherChangeInterval: 4500 // Weather changes every 4.5 seconds
   },
   4: { // Expert
     name: 'Expert',
@@ -93,8 +96,9 @@ const levelSettings = {
     pointsToWin: 50,
     rainSpeed: 1000,
     rainFrequency: 600,
-    maxMisses: 1,
-    colorSwitchChance: 0.9 // 90% of drops change color in weather
+    maxMisses: 3,
+    colorSwitchChance: 0.9, // 90% of drops change color in weather
+    weatherChangeInterval: 3500 // Weather changes every 3.5 seconds
   }
 };
 
@@ -107,13 +111,13 @@ function setLevel(lvl) {
   const settings = levelSettings[level] || levelSettings[2];
 
   // Set game rules based on level
-  timeLeft = settings.time;
-  pointsToWin = settings.pointsToWin;
-  rainSpeed = settings.rainSpeed;
-  rainFrequency = settings.rainFrequency;
-  maxMisses = settings.maxMisses;
-  // Store color switch chance for this level
-  window.colorSwitchChance = settings.colorSwitchChance;
+  // These values control the challenge and fairness for each level
+  timeLeft = settings.time; // How much time the player has
+  pointsToWin = settings.pointsToWin; // How many points needed to win
+  rainSpeed = settings.rainSpeed; // How fast drops fall (lower = faster)
+  rainFrequency = settings.rainFrequency; // How often drops appear (lower = more often)
+  maxMisses = settings.maxMisses; // How many Xs (misses) allowed before losing
+  window.colorSwitchChance = settings.colorSwitchChance; // How often drops change color in weather
 
   // Set difficulty string for reference (optional)
   if (level === 1) {
@@ -128,10 +132,11 @@ function setLevel(lvl) {
     difficulty = 'medium';
   }
 
-  // For debugging: show which level is set
+  // For debugging: show which level is set and its settings
   console.log(`Level set to: ${settings.name}`);
+  console.log(`Time: ${timeLeft}, Points to Win: ${pointsToWin}, Rain Speed: ${rainSpeed}, Rain Frequency: ${rainFrequency}, Max Misses: ${maxMisses}, Color Switch Chance: ${window.colorSwitchChance}`);
 
-  updateLevelDisplay(); // <-- Add this line
+  updateLevelDisplay(); // Update the level display on the screen
 }
 
 // --- Optionally, update setDifficulty to use setLevel for consistency ---
@@ -200,6 +205,9 @@ function startGameTimerAndRain() {
       clearInterval(timerInterval);
       clearInterval(rainInterval);
       timerDisplay.textContent = '0:00';
+      // Play buzzer sound when time runs out
+      buzzerAudio.currentTime = 0;
+      buzzerAudio.play();
       // End the game if time runs out
       endGame(false);
     }
@@ -236,20 +244,8 @@ function updateWeatherBackground(type) {
 let currentWeatherEventId = 0;
 
 function startWeatherChanges(customInterval) {
-  // Set the weather change interval based on level for challenge and fairness
-  let weatherChangeInterval;
-  if (level === 1) {
-    weatherChangeInterval = 7000; // Easy: weather changes every 7 seconds
-  } else if (level === 2) {
-    weatherChangeInterval = 6000; // Medium: every 6 seconds
-  } else if (level === 3) {
-    weatherChangeInterval = 5500; // Hard: every 5.5 seconds
-  } else if (level === 4) {
-    weatherChangeInterval = 5000; // Expert: every 5 seconds
-  } else {
-    weatherChangeInterval = 7000; // Default
-  }
-  // Allow custom interval if provided
+  // Use the interval from levelSettings, or a custom one if provided
+  let weatherChangeInterval = levelSettings[level]?.weatherChangeInterval || 7000;
   if (customInterval) weatherChangeInterval = customInterval;
 
   weatherInterval = setInterval(() => {
@@ -374,9 +370,14 @@ function resetGame() {
   updateMisses();
   if (scoreDisplay) scoreDisplay.textContent = '0';
   if (timerDisplay) {
-    let minutes = Math.floor(levelSettings[level].time / 60);
-    let seconds = levelSettings[level].time % 60;
-    timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    // If on Easy level, always show 1:00
+    if (level === 1) {
+      timerDisplay.textContent = '1:00';
+    } else {
+      let minutes = Math.floor(levelSettings[level].time / 60);
+      let seconds = levelSettings[level].time % 60;
+      timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    }
   }
   // Set background to normal while charity message is on display
   updateWeatherBackground('normal');
@@ -737,22 +738,59 @@ function checkDropInBucket(drop, isPlayerDrop) {
 
 // --- 9. SOUND EFFECTS ---
 
-// Use royalty-free audio that does not return 403 errors.
-// These are short, simple sounds from public domain sources.
-const buzzerAudio = new Audio('https://cdn.pixabay.com/audio/2022/10/16/audio_12b6b6e6e7.mp3'); // Short error beep
-const bellAudio = new Audio('https://cdn.pixabay.com/audio/2022/10/16/audio_12b6b6e6e8.mp3');   // Short bell sound
+// Use a buzzer sound for mistakes and timer running out
+const buzzerAudio = new Audio('img/buzzer-or-wrong-answer-20582.mp3'); // Buzzer sound for X or time out
+const bellAudio = new Audio('img/servant-bell-ring-2-211683.mp3');   // Bell sound for correct bucket
 
 // --- 10. SCORING, BOOSTS, AND MISTAKES ---
+
+// Milestone scores and messages
+const milestones = [
+  { score: 5, message: 'Great job! 5 points reached!' },
+  { score: 10, message: 'Awesome! 10 points milestone!' },
+  { score: 15, message: 'Halfway there! 15 points!' },
+  { score: 20, message: 'Keep going! 20 points!' },
+  { score: 25, message: 'Amazing! 25 points milestone!' },
+  { score: 35, message: 'Incredible! 35 points milestone!' },
+  { score: 50, message: 'You did it! 50 points milestone!' }
+];
+
+// Helper to show milestone message
+function showMilestoneMessage(msg) {
+  const milestoneDiv = document.createElement('div');
+  milestoneDiv.textContent = msg;
+  milestoneDiv.style.position = 'absolute';
+  milestoneDiv.style.top = '160px';
+  milestoneDiv.style.left = '50%';
+  milestoneDiv.style.transform = 'translateX(-50%)';
+  milestoneDiv.style.fontSize = '2rem';
+  milestoneDiv.style.color = '#2E9DF7';
+  milestoneDiv.style.background = '#fff8';
+  milestoneDiv.style.borderRadius = '12px';
+  milestoneDiv.style.padding = '8px 24px';
+  milestoneDiv.style.zIndex = '40';
+  milestoneDiv.style.fontWeight = 'bold';
+  milestoneDiv.style.boxShadow = '0 2px 8px #0002';
+  gameScreen.appendChild(milestoneDiv);
+  setTimeout(() => milestoneDiv.remove(), 1800);
+}
 
 function scorePoint(drop) {
   score++;
   combo++;
   updateScore();
+  // Check for milestone
+  milestones.forEach(milestone => {
+    if (score === milestone.score) {
+      showMilestoneMessage(milestone.message);
+    }
+  });
   const buckets = document.querySelectorAll('.game-screen .bucket');
   buckets.forEach(bucket => {
     if (bucket.classList.contains(`bucket-${getCurrentBucket(drop.dataset.type)}`)) {
       const originalBg = bucket.style.backgroundColor;
       bucket.style.backgroundColor = '#4FCB53';
+      // Play bell sound when correct drop is made
       bellAudio.currentTime = 0;
       bellAudio.play();
       setTimeout(() => {
@@ -771,9 +809,8 @@ function scorePoint(drop) {
 
   drop.remove();
 
-  // Only end the game if the score tracker is 25 or more
-  // This makes sure the player must have at least 25 points to win
-  if (scoreDisplay && parseInt(scoreDisplay.textContent, 10) >= pointsToWin) {
+  // Only end the game with a win if the score is enough AND time is left
+  if (score >= pointsToWin && timeLeft > 0) {
     endGame(true);
   }
 }
@@ -912,9 +949,8 @@ function addPointsBoost() {
     if (mathSpan) {
       mathSpan.textContent = `= ${score}`;
     }
-    // Only end the game if the score tracker is 25 or more
-    // This makes sure the player must have at least 25 points to win
-    if (scoreDisplay && parseInt(scoreDisplay.textContent, 10) >= pointsToWin) {
+    // Only end the game with a win if the score is enough AND time is left
+    if (score >= pointsToWin && timeLeft > 0) {
       endGame(true);
     }
     setTimeout(() => {
@@ -1040,6 +1076,7 @@ function dropWrong(drop) {
   misses++;                  // Add an X
   combo = 0;                 // Reset combo
   updateMisses();            // Update the X display
+  // Play buzzer sound for wrong bucket
   buzzerAudio.currentTime = 0;
   buzzerAudio.play();
   const buckets = document.querySelectorAll('.game-screen .bucket');
@@ -1065,6 +1102,7 @@ function dropMissed(drop) {
   misses++;
   combo = 0;
   updateMisses();
+  // Play buzzer sound for missed drop
   buzzerAudio.currentTime = 0;
   buzzerAudio.play();
   showXAtDrop(drop);
@@ -1226,14 +1264,6 @@ function stopRain() {
   document.querySelectorAll('.rain-drop').forEach(drop => drop.remove());
 }
 
-function setLevel(lvl) {
-  level = lvl;
-  rainSpeed = Math.max(900, 2500 - level * 250);
-  rainFrequency = Math.max(400, 1200 - level * 120);
-  pointsToWin = 15 + level * 5;
-  updateLevelDisplay(); // <-- Add this line
-}
-
 // --- 15. END GAME & RESET ---
 
 // This function ends the game and shows the correct overlay.
@@ -1369,6 +1399,10 @@ function startGameAfterMessage() {
 function easyLevel() {
   setLevel(1); // Set to Easy
   resetGame();
+  // Always set timer to 1:00 for Easy level
+  if (timerDisplay) {
+    timerDisplay.textContent = '1:00';
+  }
   startWeatherChanges();
   startGameTimerAndRain();
   // No custom endGame override for Easy, use default
@@ -1404,7 +1438,7 @@ function expertLevel() {
 }
 
 // When the start button is clicked, show the game screen and the message overlay
- if (startBtn && messageOverlay) {
+if (startBtn && messageOverlay) {
   startBtn.onclick = function() {
     // Hide the starter screen
     document.getElementById('starter-screen').classList.add('hidden');
@@ -1416,9 +1450,9 @@ function expertLevel() {
     messageOverlay.style.backgroundColor = 'rgba(0,0,0,0.65)';
     // --- Reset game state and background while overlay is visible ---
     resetGame();
-    // Always set timer to Easy level time (2:00) during the overlay
+    // Always set timer to Easy level time (1:00) during the overlay
     if (timerDisplay) {
-      timerDisplay.textContent = '2:00';
+      timerDisplay.textContent = '1:00'; // Always show 1:00 for Easy
     }
     // Wait 8 seconds, then hide the message and start the game
     setTimeout(function() {
