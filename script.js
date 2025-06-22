@@ -727,8 +727,11 @@ function makeDraggable(drop) {
   };
 }
 
-// Only allow scoring if the drop is actually inside a bucket when released by the player
+// This function checks if a raindrop was dropped into a bucket.
+// It prevents double-counting by using drop._handled.
 function checkDropInBucket(drop, isPlayerDrop) {
+  // If this drop was already handled, do nothing (prevents double-counting Xs)
+  if (drop._handled) return;
   if (!gameActive) return;
   drop.style.transition = 'box-shadow 0.2s';
   drop.style.zIndex = '12';
@@ -746,18 +749,22 @@ function checkDropInBucket(drop, isPlayerDrop) {
       dropRect.top + dropRect.height / 2 > rect.top &&
       dropRect.top + dropRect.height / 2 < rect.bottom
     ) {
+      // If the drop is in the correct bucket, score a point (no X)
       if (bucket.classList.contains(`bucket-${getCurrentBucket(drop.dataset.type)}`)) {
         scorePoint(drop);
+        drop._handled = true; // Mark as handled after scoring
       } else {
+        // If the drop is in the wrong bucket, add an X
         dropWrong(drop);
+        drop._handled = true; // Mark as handled after wrong drop
       }
       placed = true;
     }
   });
-  // Only count as missed if the drop was not placed in a bucket and was dropped by the player
+  // If the drop was not placed in any bucket and was dropped by the player, count as missed
   if (!placed && isPlayerDrop && !drop._handled) {
     drop._handled = true; // Mark as handled
-    dropMissed(drop);     // Count the miss
+    dropMissed(drop);     // Count the miss (add an X)
   }
 }
 

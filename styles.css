@@ -1192,3 +1192,10 @@ h1 {
 .game-screen .ground {
   background: transparent !important;
 }
+
+/* Prevent text selection while playing the game */
+#game-screen, #game-screen * {
+  user-select: none;
+  -webkit-user-select: none; /* For Safari */
+  -ms-user-select: none;     /* For IE/Edge */
+}
